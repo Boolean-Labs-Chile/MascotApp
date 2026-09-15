@@ -1,5 +1,8 @@
 # Welcome to your Expo app 👋
 
+## Roadmap
+Consulta en [ROADMAP.md](./ROADMAP.md) para revisar hitos y avances!
+
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
 ## Get started
