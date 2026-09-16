@@ -35,8 +35,8 @@ Fecha de Entrega: Viernes 2 de Octubre de 2026.
     - **Descripción:** Crear el script de arranque que instancie las tablas necesarias en el dispositivo.   
     - **Tareas:**
 
-        - [ ] Configurar conexión local con `expo-sqlite` (Si es que vamos con esa librería finalmente).
-        - [ ] Escribir query de creación para tablas `Usuario` y `Mascota` y `Tratamiento`, incluyendo la restricción de imagen.
+        - [X] Configurar conexión local con `expo-sqlite` (Si es que vamos con esa librería finalmente).
+        - [X] Escribir query de creación para tablas `Usuario` y `Mascota` y `Tratamiento`, incluyendo la restricción de imagen.
 
 ## Hito 2: Operaciones CRUD Mascota y Persistencia Local
 
