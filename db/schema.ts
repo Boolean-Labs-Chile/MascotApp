@@ -27,7 +27,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 
             CREATE TABLE IF NOT EXISTS mascota (
                 id_mascota integer primary key autoincrement,
-                id_usuario integer not null
+                id_usuario integer not null,
                 nombre text not null,
                 edad integer,
                 genero text not null check (genero IN ('macho','hembra')),
@@ -39,9 +39,8 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
                    or imagen_perfil like '%.jpeg'
                    or imagen_perfil like '%.png'
                    or imagen_perfil like '%.webp'
-                   or imagen_perfil like '%.heic'
                    or imagen_perfil like 'file://%'
-                   or imagen_perfil like 'contect://%'
+                   or imagen_perfil like 'content://%'
                    or imagen_perfil like 'http%'   
                 ),
                 numero_chip Text,
@@ -57,7 +56,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
                 fecha_aplicacion Text,
                 fecha_siguiente_dosis Text,
                 tipo_tratamiento text check (tipo_tratamiento in ('interno','externo')),
-                foreign key (id_mascota) references mascota (id_mascota0) on delete cascade 
+                foreign key (id_mascota) references mascota (id_mascota) on delete cascade 
 
             );
          `);
