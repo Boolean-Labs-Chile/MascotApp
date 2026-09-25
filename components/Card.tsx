@@ -7,7 +7,7 @@ type CardProps = {
 
 export default function Card({ children }: CardProps) {
     return (
-        <View className="bg-button-ligh rounded-2xl p-4 shadow-sm">
+        <View className="bg-white rounded-xl p-6 shadow-sm">
             {children}
         </View>
     );

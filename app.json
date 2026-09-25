@@ -27,6 +27,12 @@
       "bundler": "metro"
     },
     "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "La app necesita acceso a tu galeria para elegir la imagen de perfil de tu mascota."
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
