@@ -1,0 +1,29 @@
+# Dependencias y artefactos de build
+node_modules/
+dist/
+web-build/
+coverage/
+
+# Expo
+.expo/
+.expo-shared/
+
+# Carpetas nativas generadas
+ios/
+android/
+
+# Binarios: Prettier no los formatea, pero se listan por explícito
+assets/
+*.ttf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.webp
+
+# El lockfile lo gestiona npm, no debe formatearse
+package-lock.json
+
+# Documentación: se formatea a mano
+*.md
