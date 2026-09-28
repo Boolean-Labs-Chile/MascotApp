@@ -1,53 +1,102 @@
-# Welcome to your Expo app 👋
+# MascotApp 🐾
 
-## Roadmap
-Consulta en [ROADMAP.md](./ROADMAP.md) para revisar hitos y avances!
+App móvil para gestionar el perfil y los tratamientos de tus mascotas.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Construida con **Expo SDK 54** y **Expo Router**, con navegación por archivos, estilos con
+**NativeWind** y persistencia local prevista en **SQLite**.
 
-## Get started
+## Estado del proyecto
 
-1. Install dependencies
+| Hito              | Issues   | Estado                                            |
+| ----------------- | -------- | ------------------------------------------------- |
+| 1 · Base y diseño | #1 – #4  | #1 [x] #2 [x] · #3 falta el Sidebar · #4 ...      |
+| 2 · CRUD Mascota  | #5 – #7  | #5 ✅ (UI lista, sin persistir) · #6 ... · #7 ... |
+| 3 · Tratamientos  | #8 – #10 | ...                                               |
+
+**Ya implementado**
+
+- Navegación: Stack raíz + grupo `(auth)` (login / registrarse) + `Tabs` (Inicio, Nueva Mascota).
+- Sistema de diseño: paleta Tailwind y tipografías Nunito cargadas desde `assets/fonts`.
+- Componentes base: `Button`, `Card`, `Input` y `RadioButton`.
+- Formulario de registro de mascota completo, con selector de foto de perfil.
+- `expo-sqlite` y `expo-file-system` instalados y configurados en `app.json` (aún sin usar).
+
+**Próximos pasos:** inicializar SQLite (Issue #4), persistir la mascota (Issue #6) y completar el CRUD.
+
+> Detalle completo de hitos y tareas en [ROADMAP.md](./ROADMAP.md).
+
+## Stack
+
+| Área       | Tecnología                                           |
+| ---------- | ---------------------------------------------------- |
+| Framework  | Expo SDK 54, React Native 0.81, React 19.1           |
+| Navegación | Expo Router 6 (file-based routing, typed routes)     |
+| Estilos    | NativeWind 4 + Tailwind CSS 3                        |
+| Lenguaje   | TypeScript 5.9                                       |
+| Datos      | `expo-sqlite` (pendiente de uso), `expo-file-system` |
+| Multimedia | `expo-image`, `expo-image-picker`, `datetimepicker`  |
+| Otros      | `expo-font`, `expo-splash-screen`, `expo-haptics`    |
+
+## Requisitos
+
+- **Node.js 20.19.x** o superior (mínimo exigido por Expo SDK 54).
+- npm.
+- Para probar en dispositivo: la app **Expo Go**. Alternativamente, emulador de Android o simulador de iOS.
+
+## Cómo empezar
+
+1. Instalar las dependencias:
 
    ```bash
-   npm install
+   npx expo install
    ```
 
-2. Start the app
+2. Levantar el servidor de desarrollo:
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   Escanea el QR con Expo Go, o elige una de las opciones que aparecen en la terminal
+   (Android, iOS, web).
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Estructura
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```text
+app/
+├── _layout.tsx            # Stack raíz, carga de fuentes y SplashScreen
+├── index.tsx              # Bienvenida → registro / login
+├── (auth)/
+│   ├── _layout.tsx        # Stack + KeyboardAvoidingView
+│   ├── login.tsx
+│   └── registrarse.tsx
+└── (tabs)/
+    ├── _layout.tsx        # Tabs: Inicio | Nueva Mascota
+    ├── home.tsx
+    └── mascot-nueva.tsx   # Formulario de registro de mascota
+components/
+├── Button.tsx
+├── Card.tsx
+├── Input.tsx
+└── RadioButton.tsx
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Sistema de diseño
 
-## Learn more
+Tokens definidos en `tailwind.config.js`:
 
-To learn more about developing your project with Expo, look at the following resources:
+| Token           | Clase             | Valor     |
+| --------------- | ----------------- | --------- |
+| Fondo           | `bg-background`   | `#cbfbf1` |
+| Botón principal | `bg-button-dark`  | `#46ecd5` |
+| Botón claro     | `bg-button-light` | `#f0fdfa` |
+| Texto           | `text-text`       | `#022f2e` |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Tipografías **Nunito**: `font-sans` (Regular), `font-sans-bold` (Bold) y
+`font-sans-semibold` (SemiBold).
 
-## Join the community
+## Documentación del equipo
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [ROADMAP.md](./ROADMAP.md) — hitos, issues y tareas.
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — convenciones de ramas, commits, PRs y comandos de lint.
+- [DEPENDENCIES.md](./DEPENDENCIES.md) — formato para documentar dependencias nuevas.
