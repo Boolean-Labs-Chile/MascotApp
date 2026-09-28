@@ -5,9 +5,11 @@ import { useEffect } from "react";
 
 import '../global.css';
 
+// Previene que la pantalla de carga (Splash Screen) se oculte automáticamente
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  
   const [fontsLoaded] = useFonts({
     'Nunito-Regular': require('../assets/fonts/Nunito/Nunito-Regular.ttf'),
     'Nunito-Bold': require('../assets/fonts/Nunito/Nunito-Bold.ttf'),
@@ -20,9 +22,14 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
+  // Si las fuentes aún no cargan, se mantiene la Splash Screen visible
   if (!fontsLoaded) {
     return null;
   }
   
-  return <Stack />;
+  return (
+    <Stack>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+    </Stack>
+  );
 }
