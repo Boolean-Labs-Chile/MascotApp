@@ -18,18 +18,27 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="home"
+        name="perfil"
         options={{
-          title: "Inicio",
+          title: "Perfil",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="mascota-nueva"
+        name="registro-medico"
         options={{
-          title: "Nueva Mascota",
+          title: "Registro Médico",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="add-circle" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="contactos"
+        options={{
+          title: "Contactos",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="add-circle" size={size} color={color} />
           ),
