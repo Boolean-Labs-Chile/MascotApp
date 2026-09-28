@@ -83,18 +83,18 @@ export default function MascotaNueva() {
   return (
     <ScrollView className="flex-1 bg-background">
       <View className="px-6 py-8">
-        <Text className="text-text font-bold text-3xl mb-2">
+        <Text className="mb-2 text-3xl font-bold text-text">
           Registra a tu mascota
         </Text>
-        <Text className="text-text font-normal text-base opacity-70 mb-6">
+        <Text className="mb-6 text-base font-normal text-text opacity-70">
           Completa la información de tu nueva mascota
         </Text>
 
         {/* Foto de perfil */}
-        <View className="items-center mb-6">
+        <View className="mb-6 items-center">
           <TouchableOpacity
             onPress={handleSelectPhoto}
-            className="w-32 h-32 rounded-full bg-gray-200 items-center justify-center overflow-hidden border-2 border-button-dark"
+            className="h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-button-dark bg-gray-200"
           >
             {fotoUri ? (
               <Image
@@ -103,7 +103,7 @@ export default function MascotaNueva() {
                 contentFit="cover"
               />
             ) : (
-              <Text className="text-gray-400 text-sm text-center px-2">
+              <Text className="px-2 text-center text-sm text-gray-400">
                 Toca para agregar foto
               </Text>
             )}
@@ -120,7 +120,7 @@ export default function MascotaNueva() {
 
         {/* Género */}
         <View className="mb-4">
-          <Text className="text-text font-semibold text-sm mb-2">Género</Text>
+          <Text className="mb-2 text-sm font-semibold text-text">Género</Text>
           <RadioButton
             label="Macho"
             selected={genero === "macho"}
@@ -134,8 +134,8 @@ export default function MascotaNueva() {
         </View>
 
         {/* Esterilizado */}
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-text font-semibold text-sm">Esterilizado</Text>
+        <View className="mb-4 flex-row items-center justify-between">
+          <Text className="text-sm font-semibold text-text">Esterilizado</Text>
           <Switch
             value={esterilizado}
             onValueChange={setEsterilizado}
@@ -146,14 +146,14 @@ export default function MascotaNueva() {
 
         {/* Fecha de nacimiento */}
         <View className="mb-4">
-          <Text className="text-text font-semibold text-sm mb-1">
+          <Text className="mb-1 text-sm font-semibold text-text">
             Fecha de nacimiento
           </Text>
           <TouchableOpacity
-            className="bg-white border border-gray-200 rounded-xl px-4 py-3"
+            className="rounded-xl border border-gray-200 bg-white px-4 py-3"
             onPress={() => setShowPickerNacimiento(true)}
           >
-            <Text className="text-text font-normal text-base">
+            <Text className="text-base font-normal text-text">
               {formatDate(fechaNacimiento)}
             </Text>
           </TouchableOpacity>
@@ -174,14 +174,14 @@ export default function MascotaNueva() {
 
         {/* Fecha de adopción */}
         <View className="mb-4">
-          <Text className="text-text font-semibold text-sm mb-1">
+          <Text className="mb-1 text-sm font-semibold text-text">
             Fecha de adopción
           </Text>
           <TouchableOpacity
-            className="bg-white border border-gray-200 rounded-xl px-4 py-3"
+            className="rounded-xl border border-gray-200 bg-white px-4 py-3"
             onPress={() => setShowPickerAdopcion(true)}
           >
-            <Text className="text-text font-normal text-base">
+            <Text className="text-base font-normal text-text">
               {formatDate(fechaAdopcion)}
             </Text>
           </TouchableOpacity>

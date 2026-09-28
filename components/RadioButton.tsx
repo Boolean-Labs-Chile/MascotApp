@@ -1,4 +1,4 @@
-import { TouchableOpacity, Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 type RadioButtonProps = {
   label: string;
@@ -12,15 +12,15 @@ export default function RadioButton({
   onPress,
 }: RadioButtonProps) {
   return (
-    <TouchableOpacity className="flex-row items-center mb-3" onPress={onPress}>
+    <TouchableOpacity className="mb-3 flex-row items-center" onPress={onPress}>
       <View
-        className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+        className={`h-6 w-6 items-center justify-center rounded-full border-2 ${
           selected ? "border-button-dark" : "border-gray-300"
         }`}
       >
-        {selected && <View className="w-3 h-3 rounded-full bg-button-dark" />}
+        {selected && <View className="h-3 w-3 rounded-full bg-button-dark" />}
       </View>
-      <Text className="ml-3 text-text font-normal text-base">{label}</Text>
+      <Text className="ml-3 text-base font-normal text-text">{label}</Text>
     </TouchableOpacity>
   );
 }

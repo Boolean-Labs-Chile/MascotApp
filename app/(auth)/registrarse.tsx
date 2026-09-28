@@ -24,17 +24,17 @@ export default function Registrarse() {
         className="mt-6 items-center"
         onPress={() => router.back()}
       >
-        <Text className="text-text font-semibold text-sm opacity-80">
+        <Text className="text-sm font-semibold text-text opacity-80">
           Volver al inicio
         </Text>
       </TouchableOpacity>
 
       <View className="flex-1 justify-center px-8">
         <View className="mb-8">
-          <Text className="text-text font-bold text-3xl mb-2">
+          <Text className="mb-2 text-3xl font-bold text-text">
             ¡Crea tu cuenta!
           </Text>
-          <Text className="text-text font-normal text-base opacity-70">
+          <Text className="text-base font-normal text-text opacity-70">
             Regístrate para comenzar a usar la app
           </Text>
         </View>

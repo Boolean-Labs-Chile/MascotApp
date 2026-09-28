@@ -29,7 +29,7 @@ export default function Input({
     <View className="mb-4 w-full">
       {/* Etiqueta del campo */}
       {label && (
-        <Text className="text-text font-semibold text-sm mb-1">{label}</Text>
+        <Text className="mb-1 text-sm font-semibold text-text">{label}</Text>
       )}
       {/* Campo de entrada */}
       <View className="relative justify-center">
@@ -38,10 +38,10 @@ export default function Input({
           onChangeText={onChangeText}
           multiline={multiline}
           textAlignVertical={multiline ? "top" : "center"}
-          className={`bg-white border ${
+          className={`border bg-white ${
             error ? "border-red-500" : "border-gray-200"
-          } rounded-xl px-4 text-text font-normal text-base ${
-            multiline ? "py-3 min-h-[100px]" : "py-3"
+          } rounded-xl px-4 text-base font-normal text-text ${
+            multiline ? "min-h-[100px] py-3" : "py-3"
           } ${isPassword ? "pr-20" : ""} ${className}`}
           placeholderTextColor="#9CA3AF"
           secureTextEntry={isPassword && !showPassword}
@@ -52,7 +52,7 @@ export default function Input({
             className="absolute right-4 top-4"
             onPress={() => setShowPassword(!showPassword)}
           >
-            <Text className="text-xs text-text opacity-60 font-semibold">
+            <Text className="text-xs font-semibold text-text opacity-60">
               {showPassword ? "Ocultar" : "Mostrar"}
             </Text>
           </TouchableOpacity>
@@ -60,7 +60,7 @@ export default function Input({
       </View>
       {/* Mensaje de error */}
       {error && (
-        <Text className="text-red-500 text-xs mt-1 font-normal">{error}</Text>
+        <Text className="mt-1 text-xs font-normal text-red-500">{error}</Text>
       )}
     </View>
   );
