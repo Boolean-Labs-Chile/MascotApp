@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import { Image, Text, View } from "react-native";
 import Button from "../components/Button";
-import "../global.css";
 
 export default function Index() {
   const router = useRouter();
@@ -19,7 +18,7 @@ export default function Index() {
         <Text className="mb-3 text-center font-sans-bold text-3xl text-text">
           ¡Bienvenido a MascotApp!
         </Text>
-        <Text className="font-sans-light mb-4 text-center text-sm text-text">
+        <Text className="mb-4 text-center font-sans text-sm text-text">
           Crea una cuenta o inicia sesión para explorar nuestra app
         </Text>
       </View>

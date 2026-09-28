@@ -37,7 +37,6 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
-AGENTS.md
 
 # generated native folders
 /ios
