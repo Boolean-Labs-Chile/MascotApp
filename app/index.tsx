@@ -1,16 +1,18 @@
+import { useRouter } from "expo-router";
 import { Image, Text, View } from "react-native";
 import Button from "../components/Button";
 import "../global.css";
 
-
 export default function Index() {
+  const router = useRouter();
+
   return (
-    <View className="flex-1 bg-background">   
-      <View className="items-center justify-center w-64 h-64 mx-auto mt-16 mb-8">
-        <Image 
-          source={require("../assets/images/logo.png")} 
+    <View className="flex-1 bg-background">
+      <View className="items-center justify-center w-72 h-72 mx-auto mt-16 mb-8">
+        <Image
+          source={require("../assets/images/logo.png")}
           style={{ width: "100%", height: "100%" }}
-          resizeMode="contain" 
+          resizeMode="contain"
         />
       </View>
       <View className="flex-1 items-center justify-center px-8">
@@ -22,8 +24,15 @@ export default function Index() {
         </Text>
       </View>
       <View className="flex-1 justify-end pb-12 px-6 gap-3">
-        <Button label="Registrarse" onPress={() => {}} />
-        <Button label="Iniciar Sesión" onPress={() => {}} variant="light" />
+        <Button
+          label="Registrarse"
+          onPress={() => router.push("/registrarse")}
+        />
+        <Button
+          label="Iniciar Sesión"
+          onPress={() => router.push("/login")}
+          variant="light"
+        />
       </View>
     </View>
   );
