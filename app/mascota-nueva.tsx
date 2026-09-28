@@ -46,7 +46,7 @@ export default function MascotaNueva() {
       raza,
       fotoUri,
     });
-    router.replace("/(tabs)/home");
+    router.replace("/(tabs)/perfil");
   };
 
   const handleSelectPhoto = async () => {
