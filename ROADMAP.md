@@ -31,7 +31,7 @@ Fecha de Entrega: Viernes 2 de Octubre de 2026.
     - [x] Configurar la navegación principal del Stack con Expo Router.
     - [] Implementar el menú lateral (Sidebar) para poder alternar fácilmente entre los perfiles de mascotas.
 
-    > **Nota**: además del Stack principal se añadió un grupo `(auth)` (login y registrarse) y una navegación por `Tabs` (Inicio, Nueva Mascota). El Sidebar sigue pendiente.
+    > **Nota**: además del Stack principal se añadió un grupo `(auth)` (login y registrarse) y una navegación por `Tabs` con tres secciones: **Perfil**, **Registro Médico** y **Contactos**. El Sidebar sigue pendiente.
 
 - **Issue #4: Inicialización de Base de Datos SQLite**
   - **Descripción:** Crear el script de arranque que instancie las tablas necesarias en el dispositivo.
@@ -54,7 +54,7 @@ Fecha de Entrega: Viernes 2 de Octubre de 2026.
     - [x] Crear selectores para Género, Estado de Esterilización y Tipo de Animal.
     - [x] Integar selector de imagen de perfil asegurando formato estándar.
 
-    > **Nota**: la UI del formulario está completa. La "Edad" se implementó como "Fecha de nacimiento" (se agregó además "Fecha de adopción"), y el "Tipo de Animal" es un campo de texto libre (`especie`) en lugar de un selector. El selector de foto usa `expo-image-picker` con recorte 1:1 y calidad 0.7. Falta la persistencia (Issue #6).
+    > **Nota**: la UI del formulario está completa y vive en `app/mascota-nueva.tsx`, como pantalla del Stack principal (fuera de los `Tabs`). La "Edad" se implementó como "Fecha de nacimiento" (se agregó además "Fecha de adopción"), y el "Tipo de Animal" es un campo de texto libre (`especie`) en lugar de un selector. El selector de foto usa `expo-image-picker` con recorte 1:1 y calidad 0.7. Falta la persistencia (Issue #6).
 
 - **Issue #6: Crear y leer datos de Mascota**
   - **Descripción:** Construir la interfaz de captura de datos básicos.
@@ -65,7 +65,7 @@ Fecha de Entrega: Viernes 2 de Octubre de 2026.
     - [ ] Implementar función `SELECT` en SQLite para cargar las mascotas en el Sidebar.
     - [ ] Construir la vista principal de detalles de la mascota.
 
-    > **Nota**: el selector de foto ya funciona a nivel de interfaz (Issue #5), pero la imagen aún no se persiste en disco. El handler `handleGuardar` en `app/(tabs)/mascota-nueva.tsx` es un placeholder: todo el CRUD queda pendiente.
+    > **Nota**: el selector de foto ya funciona a nivel de interfaz (Issue #5), pero la imagen aún no se persiste en disco. El handler `handleGuardar` en `app/mascota-nueva.tsx` es un placeholder: todo el CRUD queda pendiente.
 
 - **Issue #7: Actualizar y eliminar registros de Mascota**
   - **Descripción:** Finalizar el CRUD permitiendo la edición y eliminación.
@@ -87,6 +87,8 @@ Fecha de Entrega: Viernes 2 de Octubre de 2026.
     - [ ] Crear formulario con campos: `nombre_producto`, `tipo_tratamiento` (Interno/Externo), `fecha_aplicación` y `fecha_siguiente_dosis`.
     - [ ] Crear lista o tabla en la vista de la mascota para visualizar su historial de tratamientos.
 
+    > **Nota**: la pantalla `app/(tabs)/registro-medico.tsx` ya existe como pestaña de los `Tabs`, pero es un placeholder sin funcionalidad.
+
 - **Issue #9: Persistencia de Tratamientos**
   - **Descripción:** Conectar el formulario de tratamientos con SQLite
   - **Tareas:**
@@ -102,3 +104,10 @@ Fecha de Entrega: Viernes 2 de Octubre de 2026.
     - [ ] Validar que el borrado en cascada (eliminar mascota borre sus tratamientos) funcione en SQLite.
     - [ ] Ajustes finales de NativeWind (márgenes, paddings) según los 3 colores definidos.
     - [ ] Generar la build lista para presentar en Expo Go.
+
+## Fuera del alcance planificado
+
+Funcionalidad añadida durante el desarrollo que **no figura en ningún issue** de este roadmap.
+Decidir si se incorpora al alcance o se retira antes del code freeze:
+
+- **Autenticación (UI):** pantallas de login y registro con validación local pendiente. Hoy el "registro" no crea usuario: solo navega al alta de mascota.

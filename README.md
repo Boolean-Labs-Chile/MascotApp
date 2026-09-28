@@ -1,27 +1,28 @@
 # MascotApp 🐾
 
-App móvil para gestionar el perfil y los tratamientos de tus mascotas.
+App móvil para gestionar el perfil, los tratamientos y los contactos de emergencia de tus mascotas.
 
 Construida con **Expo SDK 54** y **Expo Router**, con navegación por archivos, estilos con
 **NativeWind** y persistencia local prevista en **SQLite**.
 
 ## Estado del proyecto
 
-| Hito              | Issues   | Estado                                            |
-| ----------------- | -------- | ------------------------------------------------- |
-| 1 · Base y diseño | #1 – #4  | #1 [x] #2 [x] · #3 falta el Sidebar · #4 ...      |
-| 2 · CRUD Mascota  | #5 – #7  | #5 ✅ (UI lista, sin persistir) · #6 ... · #7 ... |
-| 3 · Tratamientos  | #8 – #10 | ...                                               |
+| Hito              | Issues   | Estado                                             |
+| ----------------- | -------- | -------------------------------------------------- |
+| 1 · Base y diseño | #1 – #4  | #1 [x] #2 [x] · #3 falta el Sidebar · #4 ...       |
+| 2 · CRUD Mascota  | #5 – #7  | #5 [x] (UI lista, sin persistir) · #6 ... · #7 ... |
+| 3 · Tratamientos  | #8 – #10 | ...                                                |
 
 **Ya implementado**
 
-- Navegación: Stack raíz + grupo `(auth)` (login / registrarse) + `Tabs` (Inicio, Nueva Mascota).
+- Navegación: Stack raíz + grupo `(auth)` (login / registrarse) + `Tabs` (Perfil, Registro Médico, Contactos).
 - Sistema de diseño: paleta Tailwind y tipografías Nunito cargadas desde `assets/fonts`.
 - Componentes base: `Button`, `Card`, `Input` y `RadioButton`.
 - Formulario de registro de mascota completo, con selector de foto de perfil.
 - `expo-sqlite` y `expo-file-system` instalados y configurados en `app.json` (aún sin usar).
 
-**Próximos pasos:** inicializar SQLite (Issue #4), persistir la mascota (Issue #6) y completar el CRUD.
+**Próximos pasos:** corregir la ruta de redirección del login, inicializar SQLite (Issue #4),
+persistir la mascota (Issue #6) y completar el CRUD.
 
 > Detalle completo de hitos y tareas en [ROADMAP.md](./ROADMAP.md).
 
@@ -57,23 +58,22 @@ Construida con **Expo SDK 54** y **Expo Router**, con navegación por archivos, 
    npx expo start
    ```
 
-   Escanea el QR con Expo Go, o elige una de las opciones que aparecen en la terminal
-   (Android, iOS, web).
-
 ## Estructura
 
 ```text
 app/
-├── _layout.tsx            # Stack raíz, carga de fuentes y SplashScreen
+├── _layout.tsx            # Stack raíz, carga de fuentes Nunito y SplashScreen
 ├── index.tsx              # Bienvenida → registro / login
+├── mascota-nueva.tsx      # Alta de mascota (pantalla del Stack, fuera de los Tabs)
 ├── (auth)/
 │   ├── _layout.tsx        # Stack + KeyboardAvoidingView
 │   ├── login.tsx
 │   └── registrarse.tsx
 └── (tabs)/
-    ├── _layout.tsx        # Tabs: Inicio | Nueva Mascota
-    ├── home.tsx
-    └── mascot-nueva.tsx   # Formulario de registro de mascota
+    ├── _layout.tsx        # Tabs: Perfil | Registro Médico | Contactos
+    ├── perfil.tsx         # Placeholder
+    ├── registro-medico.tsx# Placeholder (destinado a Issue #8)
+    └── contactos.tsx      # Placeholder (fuera del alcance del ROADMAP)
 components/
 ├── Button.tsx
 ├── Card.tsx
@@ -98,5 +98,5 @@ Tipografías **Nunito**: `font-sans` (Regular), `font-sans-bold` (Bold) y
 ## Documentación del equipo
 
 - [ROADMAP.md](./ROADMAP.md) — hitos, issues y tareas.
-- [CONTRIBUTING.md](./CONTRIBUTING.md) — convenciones de ramas, commits, PRs y comandos de lint.
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — estructura, convenciones de ramas, commits y PRs.
 - [DEPENDENCIES.md](./DEPENDENCIES.md) — formato para documentar dependencias nuevas.
