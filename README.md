@@ -1,4 +1,6 @@
-# MascotApp 🐾
+# MascotApp
+
+[![CI](https://github.com/Boolean-Labs-Chile/MascotApp/actions/workflows/ci.yml/badge.svg)](https://github.com/Boolean-Labs-Chile/MascotApp/actions/workflows/ci.yml)
 
 App móvil para gestionar el perfil, los tratamientos y los contactos de emergencia de tus mascotas.
 
@@ -57,6 +59,19 @@ persistir la mascota (Issue #6) y completar el CRUD.
    ```bash
    npx expo start
    ```
+
+## Lint y formato
+
+```bash
+npm run lint          # ESLint
+npm run format        # aplica Prettier
+npm run format:check  # verifica el formato sin escribir
+npx tsc --noEmit      # verifica los tipos
+```
+
+Ambos checks se ejecutan automáticamente en cada PR contra `main` mediante
+[GitHub Actions](./.github/workflows/ci.yml). La configuración de Prettier está en
+`.prettierrc` y los archivos excluidos en `.prettierignore` (los `.md` se formatean a mano).
 
 ## Estructura
 

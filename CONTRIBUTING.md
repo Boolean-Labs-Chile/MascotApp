@@ -84,15 +84,16 @@ npx tsc --noEmit
 
 **Prettier (Formateador)**
 
-Sirve para dar formato de estilo al código (sangrías, comillas, punto y coma, etc.).
+Sirve para dar formato de estilo al código (sangrías, comillas, punto y coma, orden de las clases de Tailwind, etc.). La configuración vive en `.prettierrc` y activa `prettier-plugin-tailwindcss`.
 
 ```bash
-npx prettier --check .
+npm run format        # aplica el formato a todo el proyecto
+npm run format:check  # verifica sin escribir
 ```
 
-```bash
-npx prettier --write .
-```
+**Qué se formatea y qué no:** los archivos `.md` están excluidos en `.prettierignore` y se mantienen a mano. También quedan fuera `package-lock.json`, los binarios de `assets/` y los artefactos de build.
+
+**Integración continua:** `.github/workflows/ci.yml` corre `npx eslint .` y `npx prettier --check .` en cada PR contra `main` y en cada push a `main`. Ambos checks deben pasar para poder mergear.
 
 ## Convenciones de ramas
 
