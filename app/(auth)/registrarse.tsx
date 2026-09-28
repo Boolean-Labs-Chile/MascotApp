@@ -15,7 +15,7 @@ export default function Registrarse() {
   const handleRegister = () => {
     // Aquí irá la lógica de registro
     console.log("Registrando:", { nombre, email, password });
-    router.replace("/(tabs)/mascota-nueva");
+    router.replace("/mascota-nueva");
   };
 
   return (
