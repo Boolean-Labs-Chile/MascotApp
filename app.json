@@ -63,7 +63,15 @@
           "enableFileSharing": true
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "MascotApp necesita acceso a tus fotos para elegir la imagen de perfil de tu mascota.",
+          "cameraPermission": false
+        }
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
