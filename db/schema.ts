@@ -1,20 +1,20 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
+import type { SQLiteDatabase } from "expo-sqlite";
 
-export const DATABASE_NAME = 'mascotapp.db';
+export const DATABASE_NAME = "mascotapp.db";
 
-
-const DATABASE_VERSION =1;
+const DATABASE_VERSION = 2;
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
-    const row = await db.getFirstAsync <{ user_version: number }>('PRAGMA user_version');
-    let currentVersion = row?.user_version ?? 0;
+  await db.execAsync("PRAGMA foreign_keys = ON;");
+  const row = await db.getFirstAsync<{ user_version: number }>(
+    "PRAGMA user_version",
+  );
+  let currentVersion = row?.user_version ?? 0;
 
-    if (currentVersion >= DATABASE_VERSION) return;
+  if (currentVersion >= DATABASE_VERSION) return;
 
-    await db.execAsync('PRAGMA foreign_keys = ON;');
-
-    if (currentVersion === 0) {
-        await db.execAsync(`
+  if (currentVersion === 0) {
+    await db.execAsync(`
             CREATE TABLE IF NOT EXISTS usuario (
                 id_usuario integer primary key autoincrement,
                 nombre text not null,
@@ -60,10 +60,19 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 
             );
          `);
-        
-        currentVersion = 1;
-        
-    }
 
-    await db.execAsync (`PRAGMA user_version = ${currentVersion}`)
+    currentVersion = 1;
+  }
+
+  if (currentVersion === 1) {
+    await db.withTransactionAsync(async () => {
+      await db.execAsync(`
+                ALTER TABLE mascota ADD COLUMN fecha_nacimiento TEXT;
+                ALTER TABLE mascota ADD COLUMN fecha_adopcion TEXT;
+                ALTER TABLE mascota ADD COLUMN color TEXT;
+                ALTER TABLE mascota ADD COLUMN raza TEXT;
+                PRAGMA user_version = 2;
+            `);
+    });
+  }
 }

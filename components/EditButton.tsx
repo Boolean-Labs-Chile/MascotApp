@@ -9,6 +9,8 @@ interface EditButtonProps {
 export function EditButton({ onPress }: EditButtonProps) {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Editar mascota"
       onPress={onPress}
       className="items-center justify-center p-2 active:opacity-70"
     >

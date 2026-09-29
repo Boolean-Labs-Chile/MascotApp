@@ -1,8 +1,13 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { SQLiteProvider } from "expo-sqlite";
+import { Suspense, useEffect } from "react";
+import { ActivityIndicator, Platform, View } from "react-native";
 
+import { inicializarBaseDeDatos } from "@/db/inicializar";
+import { DATABASE_NAME } from "@/db/schema";
+import { MascotasProvider } from "@/contexts/MascotasContext";
 import "../global.css";
 
 // Previene que la pantalla de carga (Splash Screen) se oculte automáticamente
@@ -27,13 +32,24 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
+    <Suspense
+      fallback={
+        <View style={{ flex: 1, justifyContent: "center" }}>
+          <ActivityIndicator />
+        </View>
+      }
     >
-      <Stack.Screen name="index" />
-    </Stack>
+      <SQLiteProvider
+        databaseName={DATABASE_NAME}
+        onInit={inicializarBaseDeDatos}
+        useSuspense={Platform.OS === "web"}
+      >
+        <MascotasProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+          </Stack>
+        </MascotasProvider>
+      </SQLiteProvider>
+    </Suspense>
   );
 }
-

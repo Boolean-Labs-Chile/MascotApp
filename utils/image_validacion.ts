@@ -1,38 +1,30 @@
-import * as FileSystem from 'expo-file-system';
+import { File } from "expo-file-system";
+import { detectarFormato } from "@/utils/formatoImagen";
+export { detectarFormato } from "@/utils/formatoImagen";
 
-const TAMAÑO_MAXIMO_BYTES = 5 * 1024 * 1024;
-const EXTENSIONES_VALIDAS = ['.jpg', '.jpeg', '.png', '.webp'];
-
-export async function validarImagen(uri: string): Promise<{ valido: boolean; mensaje?: string }> {
-  const uriLower = uri.toLowerCase();
-  const tieneExtensionValida = EXTENSIONES_VALIDAS.some(ext => uriLower.endsWith(ext));
-  const esUriMovil = uriLower.startsWith('content://') || uriLower.startsWith('file://');
-
-  if (!tieneExtensionValida && !esUriMovil) {
-    return { 
-      valido: false, 
-      mensaje: 'El formato de la imagen no es compatible. Usa JPG, PNG o WEBP.' 
+const MAXIMO_BYTES = 5 * 1024 * 1024;
+export async function validarImagen(uri: string): Promise<{
+  valido: boolean;
+  mensaje?: string;
+  extension?: "jpg" | "png" | "webp";
+}> {
+  if (!uri.startsWith("file://") && !uri.startsWith("content://")) {
+    return {
+      valido: false,
+      mensaje: "Selecciona una imagen local del dispositivo.",
     };
   }
-
-  if (uriLower.startsWith('file://') || uriLower.startsWith('content://')) {
-    try {
-      const fileInfo = await FileSystem.getInfoAsync(uri);
-      
-      if (!fileInfo.exists) {
-        return { valido: false, mensaje: 'El archivo de imagen seleccionado no existe.' };
-      }
-
-      if (fileInfo.size && fileInfo.size > TAMAÑO_MAXIMO_BYTES) {
-        return { 
-          valido: false, 
-          mensaje: 'La imagen pesa más de 5 MB. Por favor elige una más liviana.' 
-        };
-      }
-    } catch (error) {
-      return { valido: false, mensaje: 'No se pudo leer el peso de la imagen.' };
-    }
+  try {
+    const archivo = new File(uri);
+    if (!archivo.exists || archivo.size <= 0)
+      return { valido: false, mensaje: "La imagen no existe o está vacía." };
+    if (archivo.size > MAXIMO_BYTES)
+      return { valido: false, mensaje: "La imagen pesa más de 5 MB." };
+    const extension = detectarFormato(await archivo.bytes());
+    if (!extension)
+      return { valido: false, mensaje: "Usa una imagen JPG, PNG o WebP." };
+    return { valido: true, extension };
+  } catch {
+    return { valido: false, mensaje: "No se pudo leer la imagen." };
   }
-
-  return { valido: true };
 }
