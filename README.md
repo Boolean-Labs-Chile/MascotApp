@@ -1,53 +1,117 @@
-# Welcome to your Expo app 👋
+# MascotApp
 
-## Roadmap
-Consulta en [ROADMAP.md](./ROADMAP.md) para revisar hitos y avances!
+[![CI](https://github.com/Boolean-Labs-Chile/MascotApp/actions/workflows/ci.yml/badge.svg)](https://github.com/Boolean-Labs-Chile/MascotApp/actions/workflows/ci.yml)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App móvil para gestionar el perfil, los tratamientos y los contactos de emergencia de tus mascotas.
 
-## Get started
+Construida con **Expo SDK 54** y **Expo Router**, con navegación por archivos, estilos con
+**NativeWind** y persistencia local prevista en **SQLite**.
 
-1. Install dependencies
+## Estado del proyecto
+
+| Hito              | Issues   | Estado                                             |
+| ----------------- | -------- | -------------------------------------------------- |
+| 1 · Base y diseño | #1 – #4  | #1 [x] #2 [x] · #3 falta el Sidebar · #4 ...       |
+| 2 · CRUD Mascota  | #5 – #7  | #5 [x] (UI lista, sin persistir) · #6 ... · #7 ... |
+| 3 · Tratamientos  | #8 – #10 | ...                                                |
+
+**Ya implementado**
+
+- Navegación: Stack raíz + grupo `(auth)` (login / registrarse) + `Tabs` (Perfil, Registro Médico, Contactos).
+- Sistema de diseño: paleta Tailwind y tipografías Nunito cargadas desde `assets/fonts`.
+- Componentes base: `Button`, `Card`, `Input` y `RadioButton`.
+- Formulario de registro de mascota completo, con selector de foto de perfil.
+- `expo-sqlite` y `expo-file-system` instalados y configurados en `app.json` (aún sin usar).
+
+**Próximos pasos:** corregir la ruta de redirección del login, inicializar SQLite (Issue #4),
+persistir la mascota (Issue #6) y completar el CRUD.
+
+> Detalle completo de hitos y tareas en [ROADMAP.md](./ROADMAP.md).
+
+## Stack
+
+| Área       | Tecnología                                           |
+| ---------- | ---------------------------------------------------- |
+| Framework  | Expo SDK 54, React Native 0.81, React 19.1           |
+| Navegación | Expo Router 6 (file-based routing, typed routes)     |
+| Estilos    | NativeWind 4 + Tailwind CSS 3                        |
+| Lenguaje   | TypeScript 5.9                                       |
+| Datos      | `expo-sqlite` (pendiente de uso), `expo-file-system` |
+| Multimedia | `expo-image`, `expo-image-picker`, `datetimepicker`  |
+| Otros      | `expo-font`, `expo-splash-screen`, `expo-haptics`    |
+
+## Requisitos
+
+- **Node.js 20.19.x** o superior (mínimo exigido por Expo SDK 54).
+- npm.
+- Para probar en dispositivo: la app **Expo Go**. Alternativamente, emulador de Android o simulador de iOS.
+
+## Cómo empezar
+
+1. Instalar las dependencias:
 
    ```bash
-   npm install
+   npx expo install
    ```
 
-2. Start the app
+2. Levantar el servidor de desarrollo:
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Lint y formato
 
 ```bash
-npm run reset-project
+npm run lint          # ESLint
+npm run format        # aplica Prettier
+npm run format:check  # verifica el formato sin escribir
+npx tsc --noEmit      # verifica los tipos
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Ambos checks se ejecutan automáticamente en cada PR contra `main` mediante
+[GitHub Actions](./.github/workflows/ci.yml). La configuración de Prettier está en
+`.prettierrc` y los archivos excluidos en `.prettierignore` (los `.md` se formatean a mano).
 
-## Learn more
+## Estructura
 
-To learn more about developing your project with Expo, look at the following resources:
+```text
+app/
+├── _layout.tsx            # Stack raíz, carga de fuentes Nunito y SplashScreen
+├── index.tsx              # Bienvenida → registro / login
+├── mascota-nueva.tsx      # Alta de mascota (pantalla del Stack, fuera de los Tabs)
+├── (auth)/
+│   ├── _layout.tsx        # Stack + KeyboardAvoidingView
+│   ├── login.tsx
+│   └── registrarse.tsx
+└── (tabs)/
+    ├── _layout.tsx        # Tabs: Perfil | Registro Médico | Contactos
+    ├── perfil.tsx         # Placeholder
+    ├── registro-medico.tsx# Placeholder (destinado a Issue #8)
+    └── contactos.tsx      # Placeholder (fuera del alcance del ROADMAP)
+components/
+├── Button.tsx
+├── Card.tsx
+├── Input.tsx
+└── RadioButton.tsx
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Sistema de diseño
 
-## Join the community
+Tokens definidos en `tailwind.config.js`:
 
-Join our community of developers creating universal apps.
+| Token           | Clase             | Valor     |
+| --------------- | ----------------- | --------- |
+| Fondo           | `bg-background`   | `#cbfbf1` |
+| Botón principal | `bg-button-dark`  | `#46ecd5` |
+| Botón claro     | `bg-button-light` | `#f0fdfa` |
+| Texto           | `text-text`       | `#022f2e` |
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Tipografías **Nunito**: `font-sans` (Regular), `font-sans-bold` (Bold) y
+`font-sans-semibold` (SemiBold).
+
+## Documentación del equipo
+
+- [ROADMAP.md](./ROADMAP.md) — hitos, issues y tareas.
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — estructura, convenciones de ramas, commits y PRs.
+- [DEPENDENCIES.md](./DEPENDENCIES.md) — formato para documentar dependencias nuevas.
