@@ -14,7 +14,7 @@ export default function Login() {
   const handleLogin = () => {
     // Aquí irá la lógica de autenticación o validación local
     console.log("Iniciar sesión con:", email, password);
-    router.replace("/(tabs)/perfil");
+    router.replace("/(tabs)/home");
   };
 
   return (

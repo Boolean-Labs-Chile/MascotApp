@@ -46,7 +46,7 @@ export default function MascotaNueva() {
       raza,
       fotoUri,
     });
-    router.replace("/(tabs)/perfil");
+    router.replace("/(drawer)/(tabs)/home");
   };
 
   const handleSelectPhoto = async () => {
@@ -90,7 +90,7 @@ export default function MascotaNueva() {
           Completa la información de tu nueva mascota
         </Text>
 
-        {/* Foto de perfil */}
+        {/* Foto de home */}
         <View className="mb-6 items-center">
           <TouchableOpacity
             onPress={handleSelectPhoto}
