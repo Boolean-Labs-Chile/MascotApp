@@ -84,10 +84,14 @@ app/
 └── (drawer)/
     ├── _layout.tsx        # Drawer lateral + CustomDrawerContent + GestureHandlerRootView
     └── (tabs)/
-        ├── _layout.tsx    # Tabs: Perfil | Registro Médico | Contactos
-        ├── home.tsx       # Perfil de la mascota (título de la pestaña)
-        ├── registro-medico.tsx
-        └── contactos.tsx
+        ├── _layout.tsx        # Tabs: Perfil | Registro Médico | Contactos
+        ├── perfil.tsx         # Placeholder
+        ├── registro-medico/   # Stack anidado de Registro Médico
+        │   ├── _layout.tsx    # Layout del Stack
+        │   ├── index.tsx      # /registro-medico
+        │   ├── [tipo].tsx     # /registro-medico/tratamientos (ruta dinámica)
+        │   └── nuevo.tsx      # /registro-medico/nuevo
+        └── contactos.tsx      # Placeholder (fuera del alcance del ROADMAP)
 components/
 ├── Button.tsx
 ├── ButtonCard.tsx
@@ -100,6 +104,8 @@ components/
 ├── SidebarToggler.tsx
 └── StatCard.tsx
 ```
+
+
 
 ## Sistema de diseño
 

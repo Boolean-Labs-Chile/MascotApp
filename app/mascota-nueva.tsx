@@ -80,7 +80,9 @@ export default function MascotaNueva() {
 
           {/* Género */}
           <View className="mb-4">
-            <Text className="mb-2 text-sm font-semibold text-text">Género</Text>
+            <Text className="mb-2 text-base font-semibold text-text">
+              Género
+            </Text>
             <RadioButton
               label="Macho"
               selected={genero === "macho"}
@@ -95,7 +97,7 @@ export default function MascotaNueva() {
 
           {/* Esterilizado */}
           <View className="mb-4 flex-row items-center justify-between">
-            <Text className="text-sm font-semibold text-text">
+            <Text className="text-base font-semibold text-text">
               Esterilizado
             </Text>
             <Switch
@@ -108,7 +110,7 @@ export default function MascotaNueva() {
 
           {/* Fecha de nacimiento */}
           <View className="mb-4">
-            <Text className="mb-1 text-sm font-semibold text-text">
+            <Text className="mb-1 text-base font-semibold text-text">
               Fecha de nacimiento
             </Text>
             <TouchableOpacity
@@ -123,7 +125,7 @@ export default function MascotaNueva() {
               <DateTimePicker
                 value={fechaNacimiento}
                 mode="date"
-                display={Platform.OS === "android" ? "spinner" : "default"}
+                display={Platform.OS === "ios" ? "spinner" : "default"}
                 onChange={(event, selectedDate) => {
                   setShowPickerNacimiento(false);
                   if (selectedDate) {
@@ -136,7 +138,7 @@ export default function MascotaNueva() {
 
           {/* Fecha de adopción */}
           <View className="mb-4">
-            <Text className="mb-1 text-sm font-semibold text-text">
+            <Text className="mb-1 text-base font-semibold text-text">
               Fecha de adopción
             </Text>
             <TouchableOpacity
@@ -151,7 +153,7 @@ export default function MascotaNueva() {
               <DateTimePicker
                 value={fechaAdopcion}
                 mode="date"
-                display={Platform.OS === "android" ? "spinner" : "default"}
+                display={Platform.OS === "ios" ? "spinner" : "default"}
                 onChange={(event, selectedDate) => {
                   setShowPickerAdopcion(false);
                   if (selectedDate) {

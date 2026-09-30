@@ -31,6 +31,7 @@ export default function TabsLayout() {
         name="registro-medico"
         options={{
           title: "Registro Médico",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons
               name="medical-information"
