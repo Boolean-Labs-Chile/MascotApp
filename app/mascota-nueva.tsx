@@ -45,7 +45,7 @@ export default function MascotaNueva() {
       raza,
       fotoUri,
     });
-    router.replace("/home");
+    router.replace("../home");
   };
 
   const formatDate = (date: Date) => {
