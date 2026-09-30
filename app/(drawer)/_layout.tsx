@@ -1,3 +1,4 @@
+import { CustomDrawerContent } from "@/components/CustomDrawerContent";
 import { Drawer } from "expo-router/drawer";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -5,22 +6,17 @@ export default function DrawerLayout() {
   return (
     <GestureHandlerRootView className="flex-1">
       <Drawer
+        drawerContent={(props) => <CustomDrawerContent props={props} />}
         screenOptions={{
           headerShown: false,
           drawerStyle: {
-            backgroundColor: "#cbfbf1", // Color de fondo del sistema de diseño (bg-background)
-            width: 280,
+            backgroundColor: "#ffffff", // Color de fondo del sistema de diseño (bg-background)
+            borderColor: "#e5e7eb",
+            borderWidth: 1,
+            width: 225,
           },
         }}
-      >
-        <Drawer.Screen
-          name="(tabs)"
-          options={{
-            drawerLabel: "Mis Mascotas",
-            title: "Mascotas",
-          }}
-        />
-      </Drawer>
+      ></Drawer>
     </GestureHandlerRootView>
   );
 }
