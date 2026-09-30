@@ -43,10 +43,10 @@ export function CustomDrawerContent(props: any) {
 
           <Pressable
             onPress={() => {
-              props.navigation.closeDrawer();
               router.push("/mascota-nueva");
+              // props.navigation.closeDrawer();
             }}
-            className="mt-2 flex-row items-center gap-3 rounded-md bg-button-light p-5 active:opacity-70"
+            className="mt-2 flex-row items-center gap-3 rounded-md bg-button-light bg-button-light p-5 active:opacity-70"
           >
             <AntDesign name="plus" size={16} color="black" />
             <Text className="font-sans text-base text-text">
@@ -57,7 +57,6 @@ export function CustomDrawerContent(props: any) {
 
         <Pressable
           onPress={() => {
-            props.navigation.closeDrawer();
             router.replace("/login");
           }}
           className="flex-row items-center justify-center gap-3 rounded-md border-t border-gray-300 p-3 active:opacity-70"
