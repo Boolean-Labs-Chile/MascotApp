@@ -1,32 +1,42 @@
 import { ButtonCard } from "@/components/ButtonCard";
 import { EditButton } from "@/components/EditButton";
+import { ImageSelector } from "@/components/ImageSelector";
 import { SidebarToggler } from "@/components/SidebarToggler";
-import React from "react";
+import { StatCard } from "@/components/StatCard";
+import { useState } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Home() {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const handleCardPress = (section: string) => {
     console.log(`Abrir sección: ${section}`);
   };
 
   return (
     <SafeAreaView className="flex-1 items-center justify-between bg-background">
-      <View className="mt-4 w-full flex-row items-center justify-between px-4">
+      <View className="my-2 w-full flex-row items-center justify-between px-4">
         <SidebarToggler nombreMascota="Canela" />
         <EditButton onPress={() => console.log("Edit button pressed")} />
       </View>
-      <Text className="font-sans-bold text-2xl text-text">
-        Página Principal
+      <ImageSelector
+        imageUri={selectedImage}
+        onImageSelected={setSelectedImage}
+      />
+      <Text className="font-sans-bold text-2xl text-text">Canela</Text>
+      <Text className="mb-1 font-sans text-base text-text opacity-70">
+        Gato
       </Text>
-      <Text className="mt-2 font-sans text-base text-text opacity-70">
-        Bienvenido a MascotApp
-      </Text>
-      <View className="mt-6 w-full px-4">
+      <View className="my-4 flex-row gap-4 px-4 py-2">
+        <StatCard label="Edad" value="2 años" />
+        <StatCard label="Esterilizado/a" value="Sí" />
+        <StatCard label="Género" value="Hembra" />
+      </View>
+      <View className="mt-4 w-full justify-between gap-3 px-4">
         <View>
           <ButtonCard
             title="Chip Electrónico"
-            iconName="chip"
+            iconName="memory"
             iconFamily="material"
             onPress={() => handleCardPress("Chip Electrónico")}
           />
@@ -42,7 +52,7 @@ export default function Home() {
         <View>
           <ButtonCard
             title="Alergias"
-            iconName="bacteria"
+            iconName="bacteria-outline"
             iconFamily="material"
             onPress={() => handleCardPress("Alergias")}
           />

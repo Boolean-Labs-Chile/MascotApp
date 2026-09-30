@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome6, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
@@ -32,7 +32,11 @@ export default function TabsLayout() {
         options={{
           title: "Registro Médico",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle" size={size} color={color} />
+            <MaterialIcons
+              name="medical-information"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -41,7 +45,7 @@ export default function TabsLayout() {
         options={{
           title: "Contactos",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle" size={size} color={color} />
+            <FontAwesome6 name="contact-book" size={size} color={color} />
           ),
         }}
       />
