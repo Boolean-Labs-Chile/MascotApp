@@ -29,7 +29,7 @@ export default function Input({
     <View className="mb-4 w-full">
       {/* Etiqueta del campo */}
       {label && (
-        <Text className="mb-1 text-sm font-semibold text-text">{label}</Text>
+        <Text className="mb-1 text-base font-semibold text-text">{label}</Text>
       )}
       {/* Campo de entrada */}
       <View className="relative justify-center">

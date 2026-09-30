@@ -30,6 +30,7 @@ export default function TabsLayout() {
         name="registro-medico"
         options={{
           title: "Registro Médico",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="add-circle" size={size} color={color} />
           ),

@@ -18,7 +18,11 @@ app/
 └── (tabs)/
     ├── _layout.tsx        # Layout de Tabs: Perfil | Registro Médico | Contactos
     ├── perfil.tsx         # /(tabs)/perfil
-    ├── registro-medico.tsx# /(tabs)/registro-medico
+    ├── registro-medico/   # Stack anidado de Registro Médico
+    │   ├── _layout.tsx    # Layout del Stack
+    │   ├── index.tsx      # /registro-medico
+    │   ├── [tipo].tsx     # /registro-medico/tratamientos (ruta dinámica)
+    │   └── nuevo.tsx      # /registro-medico/nuevo
     └── contactos.tsx      # /(tabs)/contactos
 components/                # Componentes base reutilizables
 assets/                    # Imágenes e íconos
