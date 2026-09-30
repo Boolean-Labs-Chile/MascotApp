@@ -103,7 +103,7 @@ export default function MascotaNueva() {
                 contentFit="cover"
               />
             ) : (
-              <Text className="px-2 text-center text-sm text-gray-400">
+              <Text className="px-2 text-center text-base text-gray-400">
                 Toca para agregar foto
               </Text>
             )}
@@ -120,7 +120,7 @@ export default function MascotaNueva() {
 
         {/* Género */}
         <View className="mb-4">
-          <Text className="mb-2 text-sm font-semibold text-text">Género</Text>
+          <Text className="mb-2 text-base font-semibold text-text">Género</Text>
           <RadioButton
             label="Macho"
             selected={genero === "macho"}
@@ -135,7 +135,9 @@ export default function MascotaNueva() {
 
         {/* Esterilizado */}
         <View className="mb-4 flex-row items-center justify-between">
-          <Text className="text-sm font-semibold text-text">Esterilizado</Text>
+          <Text className="text-base font-semibold text-text">
+            Esterilizado
+          </Text>
           <Switch
             value={esterilizado}
             onValueChange={setEsterilizado}
@@ -146,7 +148,7 @@ export default function MascotaNueva() {
 
         {/* Fecha de nacimiento */}
         <View className="mb-4">
-          <Text className="mb-1 text-sm font-semibold text-text">
+          <Text className="mb-1 text-base font-semibold text-text">
             Fecha de nacimiento
           </Text>
           <TouchableOpacity
@@ -174,7 +176,7 @@ export default function MascotaNueva() {
 
         {/* Fecha de adopción */}
         <View className="mb-4">
-          <Text className="mb-1 text-sm font-semibold text-text">
+          <Text className="mb-1 text-base font-semibold text-text">
             Fecha de adopción
           </Text>
           <TouchableOpacity

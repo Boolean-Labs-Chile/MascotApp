@@ -87,7 +87,11 @@ app/
 └── (tabs)/
     ├── _layout.tsx        # Tabs: Perfil | Registro Médico | Contactos
     ├── perfil.tsx         # Placeholder
-    ├── registro-medico.tsx# Placeholder (destinado a Issue #8)
+    ├── registro-medico/   # Stack anidado de Registro Médico
+    │   ├── _layout.tsx    # Layout del Stack
+    │   ├── index.tsx      # /registro-medico
+    │   ├── [tipo].tsx     # /registro-medico/tratamientos (ruta dinámica)
+    │   └── nuevo.tsx      # /registro-medico/nuevo
     └── contactos.tsx      # Placeholder (fuera del alcance del ROADMAP)
 components/
 ├── Button.tsx
