@@ -29,9 +29,9 @@ Fecha de Entrega: Viernes 2 de Octubre de 2026.
   - **Tareas:**
 
     - [x] Configurar la navegación principal del Stack con Expo Router.
-    - [] Implementar el menú lateral (Sidebar) para poder alternar fácilmente entre los perfiles de mascotas.
+    - [x] Implementar el menú lateral (Sidebar) para poder alternar fácilmente entre los perfiles de mascotas.
 
-    > **Nota**: además del Stack principal se añadió un grupo `(auth)` (login y registrarse) y una navegación por `Tabs` con tres secciones: **Perfil**, **Registro Médico** y **Contactos**. El Sidebar sigue pendiente.
+    > **Nota**: además del Stack principal se añadió un grupo `(auth)` (login y registrarse) y una navegación por `Tabs` con tres secciones: **Perfil**, **Registro Médico** y **Contactos**. El Sidebar se implementó envolviendo los `Tabs` en un `Drawer` (`app/(drawer)/_layout.tsx`) con contenido propio (`components/CustomDrawerContent.tsx`). Sigue pendiente conectarlo a los perfiles reales de SQLite (Issue #6).
 
 - **Issue #4: Inicialización de Base de Datos SQLite**
   - **Descripción:** Crear el script de arranque que instancie las tablas necesarias en el dispositivo.
@@ -87,7 +87,7 @@ Fecha de Entrega: Viernes 2 de Octubre de 2026.
     - [ ] Crear formulario con campos: `nombre_producto`, `tipo_tratamiento` (Interno/Externo), `fecha_aplicación` y `fecha_siguiente_dosis`.
     - [ ] Crear lista o tabla en la vista de la mascota para visualizar su historial de tratamientos.
 
-    > **Nota**: la pantalla `app/(tabs)/registro-medico.tsx` ya existe como pestaña de los `Tabs`, pero es un placeholder sin funcionalidad.
+    > **Nota**: la pantalla `app/(drawer)/(tabs)/registro-medico.tsx` ya existe como pestaña de los `Tabs`, pero es un placeholder sin funcionalidad.
 
 - **Issue #9: Persistencia de Tratamientos**
   - **Descripción:** Conectar el formulario de tratamientos con SQLite

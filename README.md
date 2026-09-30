@@ -11,20 +11,17 @@ Construida con **Expo SDK 54** y **Expo Router**, con navegación por archivos, 
 
 | Hito              | Issues   | Estado                                             |
 | ----------------- | -------- | -------------------------------------------------- |
-| 1 · Base y diseño | #1 – #4  | #1 [x] #2 [x] · #3 falta el Sidebar · #4 ...       |
+| 1 · Base y diseño | #1 – #4  | #1 [x] #2 [x] #3 [x] (Sidebar listo) · #4 (Equipo Backend)     |
 | 2 · CRUD Mascota  | #5 – #7  | #5 [x] (UI lista, sin persistir) · #6 ... · #7 ... |
 | 3 · Tratamientos  | #8 – #10 | ...                                                |
 
 **Ya implementado**
 
-- Navegación: Stack raíz + grupo `(auth)` (login / registrarse) + `Tabs` (Perfil, Registro Médico, Contactos).
+- Navegación: Stack raíz + grupo `(auth)` (login / registrarse) + `Drawer` lateral con `Tabs` (Perfil, Registro Médico, Contactos).
 - Sistema de diseño: paleta Tailwind y tipografías Nunito cargadas desde `assets/fonts`.
-- Componentes base: `Button`, `Card`, `Input` y `RadioButton`.
+- Componentes base: `Button`, `ButtonCard`, `Card`, `CustomDrawerContent`, `EditButton`, `ImageSelector`, `Input`, `RadioButton`, `SidebarToggler` y `StatCard`.
 - Formulario de registro de mascota completo, con selector de foto de perfil.
 - `expo-sqlite` y `expo-file-system` instalados y configurados en `app.json` (aún sin usar).
-
-**Próximos pasos:** corregir la ruta de redirección del login, inicializar SQLite (Issue #4),
-persistir la mascota (Issue #6) y completar el CRUD.
 
 > Detalle completo de hitos y tareas en [ROADMAP.md](./ROADMAP.md).
 
@@ -79,21 +76,29 @@ Ambos checks se ejecutan automáticamente en cada PR contra `main` mediante
 app/
 ├── _layout.tsx            # Stack raíz, carga de fuentes Nunito y SplashScreen
 ├── index.tsx              # Bienvenida → registro / login
-├── mascota-nueva.tsx      # Alta de mascota (pantalla del Stack, fuera de los Tabs)
+├── mascota-nueva.tsx      # Alta de mascota (pantalla del Stack, fuera del Drawer)
 ├── (auth)/
 │   ├── _layout.tsx        # Stack + KeyboardAvoidingView
 │   ├── login.tsx
 │   └── registrarse.tsx
-└── (tabs)/
-    ├── _layout.tsx        # Tabs: Perfil | Registro Médico | Contactos
-    ├── perfil.tsx         # Placeholder
-    ├── registro-medico.tsx# Placeholder (destinado a Issue #8)
-    └── contactos.tsx      # Placeholder (fuera del alcance del ROADMAP)
+└── (drawer)/
+    ├── _layout.tsx        # Drawer lateral + CustomDrawerContent + GestureHandlerRootView
+    └── (tabs)/
+        ├── _layout.tsx    # Tabs: Perfil | Registro Médico | Contactos
+        ├── home.tsx       # Perfil de la mascota (título de la pestaña)
+        ├── registro-medico.tsx
+        └── contactos.tsx
 components/
 ├── Button.tsx
+├── ButtonCard.tsx
 ├── Card.tsx
+├── CustomDrawerContent.tsx
+├── EditButton.tsx
+├── ImageSelector.tsx
 ├── Input.tsx
-└── RadioButton.tsx
+├── RadioButton.tsx
+├── SidebarToggler.tsx
+└── StatCard.tsx
 ```
 
 ## Sistema de diseño
