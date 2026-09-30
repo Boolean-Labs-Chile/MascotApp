@@ -1,7 +1,10 @@
 import Button from "@/components/Button";
 import Card from "@/components/Card";
+import { useMascotas } from "@/components/SidebarToggler";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { useCallback, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -15,7 +18,6 @@ type Tratamiento = {
 };
 
 //ISSUE 9!!!!
-const tratamientos: Tratamiento[] = [];
 
 function Dato({ label, valor }: { label: string; valor: string }) {
   return (
@@ -34,6 +36,71 @@ export default function RegistroPorTipo() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { tipo } = useLocalSearchParams<{ tipo: string }>();
+
+  const db = useSQLiteContext();
+  const { activa } = useMascotas();
+  const idMascota = activa?.id_mascota;
+  const [tratamientos, setTratamientos] = useState<Tratamiento[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+      let vigente = true;
+
+      setTratamientos([]);
+      setError("");
+
+      if (tipo !== "tratamientos" || !idMascota) {
+        setCargando(false);
+        return;
+      }
+
+      setCargando(true);
+
+      const cargar = async () => {
+        try {
+          const filas = await db.getAllAsync<Tratamiento>(
+            `SELECT
+              t.id_tratamiento AS id,
+              t.nombre_producto AS nombreProducto,
+              COALESCE(t.fecha_aplicacion, '') AS fechaAplicacion,
+              COALESCE(t.fecha_vencimiento, '') AS fechaVencimiento,
+              COALESCE(t.fecha_siguiente_dosis, '') AS fechaSiguienteDosis,
+              COALESCE(t.comentarios, '') AS comentarios
+            FROM tratamiento t
+            INNER JOIN mascota m ON m.id_mascota = t.id_mascota
+            WHERE t.id_mascota = ?
+              AND m.id_usuario = (
+                SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1
+              )
+            ORDER BY t.fecha_aplicacion DESC, t.id_tratamiento DESC`,
+            idMascota,
+          );
+
+          if (vigente) {
+            setTratamientos(filas);
+          }
+        } catch {
+          if (vigente) {
+            setError(
+              "No se pudieron cargar los tratamientos. Vuelve a entrar para intentarlo nuevamente.",
+            );
+          }
+        } finally {
+          if (vigente) {
+            setCargando(false);
+          }
+        }
+      };
+
+      void cargar();
+
+      return () => {
+        vigente = false;
+      };
+    }, [db, idMascota, tipo]),
+  );
 
   //solo función para tratamiento sgn lo solicitado
   if (tipo !== "tratamientos") {
@@ -80,7 +147,19 @@ export default function RegistroPorTipo() {
           />
         </View>
 
-        {tratamientos.length === 0 ? (
+        {cargando ? (
+          <Text className="text-center font-sans text-base text-text opacity-60">
+            Cargando tratamientos…
+          </Text>
+        ) : error ? (
+          <Text className="text-center font-sans text-base text-text opacity-60">
+            {error}
+          </Text>
+        ) : !idMascota ? (
+          <Text className="text-center font-sans text-base text-text opacity-60">
+            Selecciona una mascota para ver sus tratamientos.
+          </Text>
+        ) : tratamientos.length === 0 ? (
           <Text className="text-center font-sans text-base text-text opacity-60">
             Aún no hay tratamientos registrados.
           </Text>
