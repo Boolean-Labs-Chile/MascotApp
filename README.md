@@ -9,18 +9,19 @@ Construida con **Expo SDK 54** y **Expo Router**, con navegación por archivos, 
 
 ## Estado del proyecto
 
-| Hito              | Issues   | Estado                                             |
-| ----------------- | -------- | -------------------------------------------------- |
-| 1 · Base y diseño | #1 – #4  | #1 [x] #2 [x] #3 [x] (Sidebar listo) · #4 (Equipo Backend)     |
-| 2 · CRUD Mascota  | #5 – #7  | #5 [x] (UI lista, sin persistir) · #6 ... · #7 ... |
-| 3 · Tratamientos  | #8 – #10 | ...                                                |
+| Hito              | Issues   | Estado                                                     |
+| ----------------- | -------- | ---------------------------------------------------------- |
+| 1 · Base y diseño | #1 – #4  | #1 [x] #2 [x] #3 [x] (Sidebar listo) · #4 (Equipo Backend) |
+| 2 · CRUD Mascota  | #5 – #7  | #5 [x] (UI lista, sin persistir) · #6 ... · #7 ...         |
+| 3 · Tratamientos  | #8 – #10 | #8 [x] (UI lista, sin persistir) · #9 ... · #10 ...        |
 
 **Ya implementado**
 
-- Navegación: Stack raíz + grupo `(auth)` (login / registrarse) + `Drawer` lateral con `Tabs` (Perfil, Registro Médico, Contactos).
+- Navegación: Stack raíz + grupo `(auth)` (login / registrarse) + `Drawer` lateral con `Tabs` (Perfil → `/home`, Registro Médico, Contactos).
 - Sistema de diseño: paleta Tailwind y tipografías Nunito cargadas desde `assets/fonts`.
 - Componentes base: `Button`, `ButtonCard`, `Card`, `CustomDrawerContent`, `EditButton`, `ImageSelector`, `Input`, `RadioButton`, `SidebarToggler` y `StatCard`.
 - Formulario de registro de mascota completo, con selector de foto de perfil.
+- Registro Médico: índice de secciones (Peso, Vacunas, Tratamientos, Notas, Archivos) y flujo de tratamientos (listado y alta con selectores de fecha). Solo `Tratamientos` está habilitada; el resto responde "próximamente".
 - `expo-sqlite` y `expo-file-system` instalados y configurados en `app.json` (aún sin usar).
 
 > Detalle completo de hitos y tareas en [ROADMAP.md](./ROADMAP.md).
@@ -31,6 +32,7 @@ Construida con **Expo SDK 54** y **Expo Router**, con navegación por archivos, 
 | ---------- | ---------------------------------------------------- |
 | Framework  | Expo SDK 54, React Native 0.81, React 19.1           |
 | Navegación | Expo Router 6 (file-based routing, typed routes)     |
+| Sidebar    | `@react-navigation/drawer` vía `expo-router/drawer`  |
 | Estilos    | NativeWind 4 + Tailwind CSS 3                        |
 | Lenguaje   | TypeScript 5.9                                       |
 | Datos      | `expo-sqlite` (pendiente de uso), `expo-file-system` |
@@ -85,7 +87,7 @@ app/
     ├── _layout.tsx        # Drawer lateral + CustomDrawerContent + GestureHandlerRootView
     └── (tabs)/
         ├── _layout.tsx        # Tabs: Perfil | Registro Médico | Contactos
-        ├── perfil.tsx         # Placeholder
+        ├── home.tsx           # Perfil de la mascota (ruta /home, pestaña "Perfil")
         ├── registro-medico/   # Stack anidado de Registro Médico
         │   ├── _layout.tsx    # Layout del Stack
         │   ├── index.tsx      # /registro-medico
@@ -104,8 +106,6 @@ components/
 ├── SidebarToggler.tsx
 └── StatCard.tsx
 ```
-
-
 
 ## Sistema de diseño
 

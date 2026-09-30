@@ -32,5 +32,16 @@
 - **Categoría:** dependencies
 - **Config:** Ninguna adicional
   - **Instalación:** Mediante `npx expo install @react-navigation/drawer`
-  - **Uso:** Importar `Drawer` desde `expo-router/drawer` dentro de un `_layout.tsx`, y `DrawerToggleButton` desde `@react-navigation/drawer` para el botón del header.
+  - **Uso:** Importar `Drawer` desde `expo-router/drawer` dentro de un `_layout.tsx`, y `DrawerContentScrollView` desde `@react-navigation/drawer` para el contenido propio del panel.
+- **Responsable:** @gramzdev
+
+## react-native-gesture-handler
+
+- **Versión**: ~2.28.0
+- **Finalidad**: Proveer los gestos que requiere el `Drawer` (deslizar para abrir y cerrar el menú lateral).
+- **Motivo**: `@react-navigation/drawer` no funciona sin esta librería. Pasó a ser obligatoria al adoptar el Sidebar (Issue #3); hasta entonces solo la transitaba Reanimated.
+- **Categoría:** dependencies
+- **Config:**
+  - **Instalación:** Mediante `npx expo install react-native-gesture-handler`
+  - **Uso:** Envolver el `Drawer` con `GestureHandlerRootView` en `app/(drawer)/_layout.tsx`, y alternar el menú con `DrawerActions.toggleDrawer()` desde `components/SidebarToggler.tsx`. Sin el `GestureHandlerRootView` en la raíz del Drawer el menú no responde.
 - **Responsable:** @gramzdev

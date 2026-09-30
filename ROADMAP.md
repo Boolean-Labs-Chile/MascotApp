@@ -84,10 +84,10 @@ Fecha de Entrega: Viernes 2 de Octubre de 2026.
   - **Descripción:** Finalizar el CRUD permitiendo la edición y eliminación.
   - **Tareas:**
 
-    - [ ] Crear formulario con campos: `nombre_producto`, `tipo_tratamiento` (Interno/Externo), `fecha_aplicación` y `fecha_siguiente_dosis`.
-    - [ ] Crear lista o tabla en la vista de la mascota para visualizar su historial de tratamientos.
+    - [x] Crear formulario con campos: `nombre_producto`, `tipo_tratamiento` (Interno/Externo), `fecha_aplicación` y `fecha_siguiente_dosis`.
+    - [x] Crear lista o tabla en la vista de la mascota para visualizar su historial de tratamientos.
 
-    > **Nota**: la pantalla `app/(drawer)/(tabs)/registro-medico.tsx` ya existe como pestaña de los `Tabs`, pero es un placeholder sin funcionalidad.
+    > **Nota**: la UI está completa en `app/(drawer)/(tabs)/registro-medico/`. El índice (`index.tsx`) lista cinco secciones y solo habilita **Tratamientos**; el resto responde "próximamente". El alta vive en `nuevo.tsx` con `nombreProducto`, tres fechas vía `@react-native-community/datetimepicker` y comentarios. Dos salvedades: el formulario **no incluye `tipo_tratamiento` (Interno/Externo)** que pedía el issue, y la lista de `[tipo].tsx` renderiza desde un array vacío, así que todavía no hay historial visible. Ambas cosas caen en el Issue #9.
 
 - **Issue #9: Persistencia de Tratamientos**
   - **Descripción:** Conectar el formulario de tratamientos con SQLite
