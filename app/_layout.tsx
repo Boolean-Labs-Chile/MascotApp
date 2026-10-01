@@ -7,7 +7,7 @@ import { SQLiteProvider } from "expo-sqlite";
 import { Suspense, useEffect } from "react";
 import { Text } from "react-native";
 
-import "../global.css";
+import "@/global.css";
 
 // Previene que la pantalla de carga (Splash Screen) se oculte automáticamente
 SplashScreen.preventAutoHideAsync();
@@ -44,6 +44,7 @@ export default function RootLayout() {
             }}
           >
             <Stack.Screen name="index" />
+            <Stack.Screen name="mascota-nueva" />
           </Stack>
         </MascotasProvider>
       </SQLiteProvider>

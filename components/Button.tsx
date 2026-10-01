@@ -16,7 +16,7 @@ export default function Button({
   return (
     <Pressable
       onPress={onPress}
-      className={`${bgClass} items-center rounded-xl px-6 py-3`}
+      className={`${bgClass} mt-3 items-center rounded-xl px-6 py-3`}
     >
       <Text className="font-sans-semibold text-base text-text">{label}</Text>
     </Pressable>

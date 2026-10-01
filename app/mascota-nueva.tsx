@@ -1,10 +1,10 @@
 import Button from "@/components/Button";
+import { ImageSelector } from "@/components/ImageSelector";
 import Input from "@/components/Input";
 import RadioButton from "@/components/RadioButton";
 import { useMascotas } from "@/components/SidebarToggler";
 import { guardarMascota } from "@/store/mascotas";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MascotaNueva() {
   const router = useRouter();
@@ -199,72 +200,58 @@ export default function MascotaNueva() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-background">
-      <View className="px-6 py-8">
-        <Text className="mb-2 text-3xl font-bold text-text">
-          {id ? "Edita a tu mascota" : "Registra a tu mascota"}
-        </Text>
-        <Text className="mb-6 text-base font-normal text-text opacity-70">
-          {id
+    <SafeAreaView className="flex-1 bg-background">
+      <ScrollView>
+        <View className="px-6 py-8">
+          <Text className="mb-2 text-3xl font-bold text-text">
+            {id ? "Edita a tu mascota" : "Registra a tu mascota"}
+          </Text>
+          <Text className="mb-6 text-base font-normal text-text opacity-70">
+            {id
             ? "Actualiza la información de tu mascota"
             : "Completa la información de tu nueva mascota"}
-        </Text>
-
-        {/* Foto de perfil */}
-        <View className="mb-6 items-center">
-          <TouchableOpacity
-            onPress={handleSelectPhoto}
-            className="h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-button-dark bg-gray-200"
-          >
-            {fotoUri ? (
-              <Image
-                source={{ uri: fotoUri }}
-                style={{ width: "100%", height: "100%" }}
-                contentFit="cover"
-              />
-            ) : (
-              <Text className="px-2 text-center text-base text-gray-400">
-                Toca para agregar foto
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* Nombre */}
-        <Input
-          label="Nombre"
-          placeholder="Nombre de tu mascota"
-          value={nombre}
-          onChangeText={setNombre}
-        />
-
-        {/* Género */}
-        <View className="mb-4">
-          <Text className="mb-2 text-base font-semibold text-text">Género</Text>
-          <RadioButton
-            label="Macho"
-            selected={genero === "macho"}
-            onPress={() => setGenero("macho")}
-          />
-          <RadioButton
-            label="Hembra"
-            selected={genero === "hembra"}
-            onPress={() => setGenero("hembra")}
-          />
-        </View>
-
-        {/* Esterilizado */}
-        <View className="mb-4 flex-row items-center justify-between">
-          <Text className="text-base font-semibold text-text">
-            Esterilizado
           </Text>
-          <Switch
-            value={esterilizado}
-            onValueChange={setEsterilizado}
-            trackColor={{ false: "#D1D5DB", true: "#46ecd5" }}
-            thumbColor={esterilizado ? "#022f2e" : "#f4f3f4"}
+
+          {/* Foto de home */}
+          <ImageSelector imageUri={fotoUri} onImageSelected={setFotoUri} />
+
+          {/* Nombre */}
+          <Input
+            label="Nombre"
+            placeholder="Nombre de tu mascota"
+            value={nombre}
+            onChangeText={setNombre}
           />
-        </View>
+
+          {/* Género */}
+          <View className="mb-4">
+            <Text className="mb-2 text-base font-semibold text-text">
+              Género
+            </Text>
+            <RadioButton
+              label="Macho"
+              selected={genero === "macho"}
+              onPress={() => setGenero("macho")}
+            />
+            <RadioButton
+              label="Hembra"
+              selected={genero === "hembra"}
+              onPress={() => setGenero("hembra")}
+            />
+          </View>
+
+          {/* Esterilizado */}
+          <View className="mb-4 flex-row items-center justify-between">
+            <Text className="text-base font-semibold text-text">
+              Esterilizado
+            </Text>
+            <Switch
+              value={esterilizado}
+              onValueChange={setEsterilizado}
+              trackColor={{ false: "#D1D5DB", true: "#46ecd5" }}
+              thumbColor={esterilizado ? "#022f2e" : "#f4f3f4"}
+            />
+          </View>
 
         {/* Fecha de nacimiento */}
         <View className="mb-4">
@@ -350,42 +337,42 @@ export default function MascotaNueva() {
             ))}
         </View>
 
-        {/* Especie */}
-        <Input
-          label="Especie"
-          placeholder="Ej: Perro, Gato, etc."
-          value={especie}
-          onChangeText={setEspecie}
-        />
+          {/* Especie */}
+          <Input
+            label="Especie"
+            placeholder="Ej: Perro, Gato, etc."
+            value={especie}
+            onChangeText={setEspecie}
+          />
 
-        {/* Color */}
-        <Input
-          label="Color"
-          placeholder="Color de tu mascota"
-          value={color}
-          onChangeText={setColor}
-        />
+          {/* Color */}
+          <Input
+            label="Color"
+            placeholder="Color de tu mascota"
+            value={color}
+            onChangeText={setColor}
+          />
 
-        {/* Signos distintivos */}
-        <Input
-          label="Signos distintivos"
-          placeholder="Marcas o características especiales"
-          value={signosDistintivos}
-          onChangeText={setSignosDistintivos}
-          multiline
-        />
+          {/* Signos distintivos */}
+          <Input
+            label="Signos distintivos"
+            placeholder="Marcas o características especiales"
+            value={signosDistintivos}
+            onChangeText={setSignosDistintivos}
+            multiline
+          />
 
-        {/* Raza */}
-        <Input
-          label="Raza"
-          placeholder="Raza de tu mascota"
-          value={raza}
-          onChangeText={setRaza}
-        />
+          {/* Raza */}
+          <Input
+            label="Raza"
+            placeholder="Raza de tu mascota"
+            value={raza}
+            onChangeText={setRaza}
+          />
 
-        {/* Botón guardar */}
-        <View className="mt-6">
-          <Button
+          {/* Botón guardar */}
+          <View className="mt-6">
+            <Button
             label={
               ocupado
                 ? "Guardando…"
@@ -395,7 +382,7 @@ export default function MascotaNueva() {
             }
             onPress={handleGuardar}
           />
-          {id ? (
+            {id ? (
             <Button
               label="Cancelar edición"
               variant="light"
@@ -405,7 +392,8 @@ export default function MascotaNueva() {
             />
           ) : null}
         </View>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

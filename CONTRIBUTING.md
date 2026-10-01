@@ -10,28 +10,32 @@ Navegación por archivos con Expo Router. El directorio `app/` **es** el enrutad
 app/
 ├── _layout.tsx            # Layout raíz: Stack, carga de fuentes y SplashScreen
 ├── index.tsx              # /            Pantalla de bienvenida
-├── mascota-nueva.tsx      # /mascota-nueva   Alta de mascota (Stack, fuera de los Tabs)
+├── mascota-nueva.tsx      # /mascota-nueva   Registro de mascota (Stack, fuera del Drawer)
 ├── (auth)/
 │   ├── _layout.tsx        # Layout de auth: Stack + KeyboardAvoidingView
 │   ├── login.tsx          # /login
 │   └── registrarse.tsx    # /registrarse
-└── (tabs)/
-    ├── _layout.tsx        # Layout de Tabs: Perfil | Registro Médico | Contactos
-    ├── perfil.tsx         # /(tabs)/perfil
-    ├── registro-medico/   # Stack anidado de Registro Médico
-    │   ├── _layout.tsx    # Layout del Stack
-    │   ├── index.tsx      # /registro-medico
-    │   ├── [tipo].tsx     # /registro-medico/tratamientos (ruta dinámica)
-    │   └── nuevo.tsx      # /registro-medico/nuevo
-    └── contactos.tsx      # /(tabs)/contactos
+└── (drawer)/
+    ├── _layout.tsx        # Layout de Drawer: menú lateral + CustomDrawerContent
+    └── (tabs)/
+        ├── _layout.tsx      # Layout de Tabs: Perfil | Registro Médico | Contactos
+        ├── home.tsx         # /home (título de la pestaña: Perfil)
+        ├── registro-medico/ # Stack anidado: convierte la sección en subpantallas
+        │   ├── _layout.tsx  # Layout del Stack (headerShown: false)
+        │   ├── index.tsx    # /registro-medico
+        │   ├── [tipo].tsx   # /registro-medico/:tipo (solo tratamientos)
+        │   └── nuevo.tsx    # /registro-medico/nuevo
+        └── contactos.tsx    # /contactos (placeholder)
 components/                # Componentes base reutilizables
-assets/                    # Imágenes e íconos
+assets/                    # Imágenes, íconos y fuentes Nunito
 ```
 
 ### Convenciones de estructura
 
 - **Cada archivo en `app/` es una pantalla.** Los layouts (`_layout.tsx`) definen la navegación compartida de su grupo.
-- **Agregar una pestaña** implica crear el archivo en `(tabs)/` y registrarlo en `app/(tabs)/_layout.tsx` con su `title` e ícono.
+- **Agregar una pestaña** implica crear el archivo en `app/(drawer)/(tabs)/` y registrarlo en `app/(drawer)/(tabs)/_layout.tsx` con su `title` e ícono. El archivo `home.tsx` expone la pestaña con título "Perfil".
+- **Una sección con subpantallas va como carpeta**, no como archivo: `registro-medico/` agrupa `_layout.tsx` (un `Stack` propio), `index.tsx` (la sección) y las rutas hijas como `[tipo].tsx` o `nuevo.tsx`. El grupo entre paréntesis no aparece en la URL, así que la carpeta sí define el path.
+- **El menú lateral vive en `app/(drawer)/_layout.tsx`**, no en `(tabs)`. El contenido del drawer se delega a `components/CustomDrawerContent.tsx`, y se abre con el `SidebarToggler` (`DrawerActions.toggleDrawer()`), no con un `DrawerToggleButton`.
 - **Los componentes reutilizables** van en `components/`, no dentro de `app/`.
 - **Importa componentes con el alias `@/`** (definido en `tsconfig.json`): `@/components/Button`. Evita rutas relativas.
 - **Tipado de rutas activo** (`typedRoutes: true` en `app.json`): una ruta inexistente es un error de TypeScript. Si `npx tsc --noEmit` se queja de una ruta, es que el archivo se movió o renombró.
@@ -114,7 +118,7 @@ Ejemplos:
 
 ```text
 feature/tratamientos
-fix/ruta-login-perfil
+fix/ruta-login-home
 docs/actualizar-readme
 ```
 
@@ -128,7 +132,7 @@ tipo(alcance): mensaje
 
 Tipos sugeridos: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
 
-Ejemplo: `fix(auth): corregir redirección de login hacia /perfil`
+Ejemplo: `fix(auth): corregir redirección de login hacia /home`
 
 ## Pull Requests
 
