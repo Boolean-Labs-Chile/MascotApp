@@ -45,9 +45,6 @@ export default function RegistroMedico() {
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       <ScrollView>
         <View className="px-6 py-6">
-          {/* Botón del Sidebar: alterna entre perfiles de mascotas.
-              TODO: pasar el nombre de la mascota activa con la prop
-              nombreMascota (hoy usa el valor por defecto, "Canela"). */}
           <View className="mb-6 flex-row">
             <SidebarToggler />
           </View>
@@ -57,18 +54,14 @@ export default function RegistroMedico() {
           </Text>
 
           {SECCIONES.map((seccion) => (
-            <View
+            <ButtonCard
               key={seccion.slug}
-              className={seccion.habilitada ? "" : "opacity-50"}
-              pointerEvents={seccion.habilitada ? "auto" : "none"}
-            >
-              <ButtonCard
-                title={seccion.titulo}
-                iconName={seccion.icono}
-                iconFamily="material"
-                onPress={() => router.push(`/registro-medico/${seccion.slug}`)}
-              />
-            </View>
+              title={seccion.titulo}
+              iconName={seccion.icono}
+              iconFamily="material"
+              disabled={!seccion.habilitada}
+              onPress={() => router.push(`/registro-medico/${seccion.slug}`)}
+            />
           ))}
         </View>
       </ScrollView>
