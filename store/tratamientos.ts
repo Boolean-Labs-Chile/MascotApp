@@ -70,3 +70,37 @@ export async function guardarTratamiento(
 
   return resultado.changes === 1;
 }
+
+//*****REVISAR POR FAVOR******
+export async function actualizarTratamiento(
+  db: SQLiteDatabase,
+  idMascota: number,
+  idTratamiento: number,
+  datos: DatosTratamiento,
+) {
+  const resultado = await db.runAsync(
+    `UPDATE tratamiento
+     SET nombre_producto = ?,
+         fecha_aplicacion = ?,
+         fecha_vencimiento = ?,
+         fecha_siguiente_dosis = ?,
+         comentarios = ?
+     WHERE id_tratamiento = ?
+       AND id_mascota = ?
+       AND id_mascota IN (
+         SELECT id_mascota FROM mascota
+         WHERE id_usuario = (
+           SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1
+         )
+       )`,
+    datos.nombreProducto,
+    datos.fechaAplicacion,
+    datos.fechaVencimiento,
+    datos.fechaSiguienteDosis,
+    datos.comentarios,
+    idTratamiento,
+    idMascota,
+  );
+
+  return resultado.changes === 1;
+}

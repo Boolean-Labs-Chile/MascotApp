@@ -111,9 +111,11 @@ export default function RegistroPorTipo() {
 
       <ScrollView contentContainerClassName="px-6 pb-8">
         <Text className="mb-4 font-sans text-base text-text opacity-70">
-          Aquí puedes <Text className="font-sans-bold italic">agregar</Text> y{" "}
-          <Text className="font-sans-bold italic">ver</Text> los tratamientos
-          (desparasitación o medicación) de tu mascota
+          Aquí puedes <Text className="font-sans-bold italic">agregar</Text>,{" "}
+          <Text className="font-sans-bold italic">ver</Text> y{" "}
+          <Text className="font-sans-bold italic">editar</Text> los tratamientos
+          (desparasitación o medicación) de tu mascota. Toca un tratamiento para
+          editarlo.
         </Text>
 
         <View className="mb-6">
@@ -141,7 +143,18 @@ export default function RegistroPorTipo() {
           </Text>
         ) : (
           tratamientos.map((t) => (
-            <View key={t.id} className="mb-4">
+            <Pressable
+              key={t.id}
+              accessibilityRole="button"
+              accessibilityLabel={`Editar tratamiento ${t.nombreProducto}`}
+              onPress={() =>
+                router.push({
+                  pathname: "/registro-medico/nuevo",
+                  params: { id: String(t.id) },
+                })
+              }
+              className="mb-4 active:scale-[0.98]"
+            >
               <Card>
                 <Dato
                   label="Nombre tratamiento (Producto)"
@@ -157,7 +170,7 @@ export default function RegistroPorTipo() {
                   <Dato label="Comentarios" valor={t.comentarios} />
                 )}
               </Card>
-            </View>
+            </Pressable>
           ))
         )}
       </ScrollView>
