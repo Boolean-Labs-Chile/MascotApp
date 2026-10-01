@@ -3,10 +3,10 @@ import { ImageSelector } from "@/components/ImageSelector";
 import Input from "@/components/Input";
 import RadioButton from "@/components/RadioButton";
 import { useMascotas } from "@/components/SidebarToggler";
-import { guardarMascota } from "@/store/mascotas";
+import { eliminarMascota, guardarMascota } from "@/store/mascotas";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import type { ImagePickerAsset } from "expo-image-picker";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -20,8 +20,42 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+// Pregunta de confirmación que funciona en móvil (Alert) y en web (confirm).
+// Devuelve true si la persona elige la opción de confirmar.
+function confirmar(
+  titulo: string,
+  mensaje: string,
+  textoCancelar: string,
+  textoConfirmar: string,
+): Promise<boolean> {
+  if (Platform.OS === "web") {
+    return Promise.resolve(window.confirm(`${titulo}\n\n${mensaje}`));
+  }
+
+  return new Promise((resolve) => {
+    Alert.alert(
+      titulo,
+      mensaje,
+      [
+        {
+          text: textoCancelar,
+          style: "cancel",
+          onPress: () => resolve(false),
+        },
+        {
+          text: textoConfirmar,
+          style: "destructive",
+          onPress: () => resolve(true),
+        },
+      ],
+      { cancelable: true, onDismiss: () => resolve(false) },
+    );
+  });
+}
+
 export default function MascotaNueva() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const db = useSQLiteContext();
   const { mascotas, cargando, recargar, seleccionar } = useMascotas();
@@ -30,6 +64,10 @@ export default function MascotaNueva() {
   );
   const cargado = useRef<string | null>(null);
   const guardando = useRef(false);
+  // true cuando la salida de la pantalla es intencional (guardar, eliminar o
+  // descartar cambios): evita que la alerta de "cambios sin guardar" reaparezca
+  const saliendo = useRef(false);
+  const alertaAbierta = useRef(false);
   const [ocupado, setOcupado] = useState(false);
   const [fotoNueva, setFotoNueva] = useState(false);
   const [extension, setExtension] = useState("jpg");
@@ -79,6 +117,60 @@ export default function MascotaNueva() {
   const fechaSQL = (fecha: Date) =>
     `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}-${String(fecha.getDate()).padStart(2, "0")}`;
 
+  // Solo hay "cambios sin guardar" al editar una mascota existente: compara lo
+  // que hay en el formulario contra lo que está guardado.
+  const hoy = fechaSQL(new Date());
+  const hayCambios =
+    existente !== undefined &&
+    (nombre !== existente.nombre ||
+      genero !== existente.genero ||
+      esterilizado !== Boolean(existente.estado_esterilizacion) ||
+      fechaSQL(fechaNacimiento) !== (existente.fecha_nacimiento ?? hoy) ||
+      fechaSQL(fechaAdopcion) !== (existente.fecha_adopcion ?? hoy) ||
+      especie !== (existente.tipo_animal ?? "") ||
+      color !== (existente.color ?? "") ||
+      signosDistintivos !== (existente.rasgos ?? "") ||
+      raza !== (existente.raza ?? "") ||
+      fotoNueva);
+
+  // Intercepta TODAS las formas de volver atrás (botón físico de Android,
+  // gesto de iOS y flecha del header, si existiera).
+  useEffect(() => {
+    return navigation.addListener("beforeRemove", (evento) => {
+      // Salida intencional: dejar pasar
+      if (saliendo.current) return;
+
+      // Guardando o eliminando: no se puede salir hasta terminar
+      if (guardando.current) {
+        evento.preventDefault();
+        return;
+      }
+
+      // Sin cambios pendientes: dejar pasar
+      if (!hayCambios) return;
+
+      evento.preventDefault();
+      if (alertaAbierta.current) return;
+      alertaAbierta.current = true;
+
+      void confirmar(
+        "¿Cancelar Edición?",
+        "¡Perderás los cambios aplicados!",
+        "Seguir editando",
+        "Salir",
+      )
+        .then((salir) => {
+          if (salir) {
+            saliendo.current = true;
+            navigation.dispatch(evento.data.action);
+          }
+        })
+        .finally(() => {
+          alertaAbierta.current = false;
+        });
+    });
+  }, [navigation, hayCambios]);
+
   const handleImageSelected = (asset: ImagePickerAsset) => {
     const nombreArchivo = (asset.fileName ?? asset.uri).split(/[?#]/)[0];
     const sufijo = nombreArchivo.split(".").pop()?.toLowerCase();
@@ -89,7 +181,6 @@ export default function MascotaNueva() {
       webp: "image/webp",
     };
     const tipo = asset.mimeType ?? formatos[sufijo ?? ""] ?? "";
-
     if (!["image/jpeg", "image/png", "image/webp"].includes(tipo)) {
       avisar("Selecciona una imagen JPG, PNG o WebP.");
       return;
@@ -102,7 +193,6 @@ export default function MascotaNueva() {
       avisar("No se pudo leer la foto. Selecciónala nuevamente.");
       return;
     }
-
     setFotoUri(
       Platform.OS === "web" ? `data:${tipo};base64,${asset.base64}` : asset.uri,
     );
@@ -154,6 +244,8 @@ export default function MascotaNueva() {
         },
         existente?.id_mascota,
       );
+      // Se guardó: la salida a /home es intencional
+      saliendo.current = true;
       await recargar().catch(() => undefined);
       seleccionar(mascotaId);
       router.replace("/home");
@@ -164,6 +256,34 @@ export default function MascotaNueva() {
       guardando.current = false;
       setOcupado(false);
     }
+  };
+
+  const handleEliminar = async () => {
+    if (guardando.current || cargando || !existente) return;
+
+    const confirmado = await confirmar(
+      "Eliminar mascota",
+      "¿Estás seguro de eliminar el perfil de tu mascota?",
+      "Cancelar",
+      "Eliminar",
+    );
+    if (!confirmado || guardando.current) return;
+
+    guardando.current = true;
+    try {
+      await eliminarMascota(db, existente.id_mascota);
+    } catch {
+      avisar("No se pudo eliminar la mascota. Vuelve a intentarlo.");
+      guardando.current = false;
+      return;
+    }
+
+    // Ya se eliminó: la salida a /home es intencional. Si no quedan mascotas,
+    // /home muestra la pantalla "Crea un perfil para tu mascota".
+    saliendo.current = true;
+    seleccionar(null);
+    await recargar().catch(() => undefined);
+    router.replace("/home");
   };
 
   const formatDate = (date: Date) => {
@@ -348,7 +468,7 @@ export default function MascotaNueva() {
             onChangeText={setRaza}
           />
 
-          {/* Botón guardar */}
+          {/* Botones */}
           <View className="mt-6">
             <Button
               label={
@@ -362,11 +482,9 @@ export default function MascotaNueva() {
             />
             {id ? (
               <Button
-                label="Cancelar edición"
+                label="Eliminar mascota"
                 variant="light"
-                onPress={() => {
-                  if (!guardando.current) router.replace("/home");
-                }}
+                onPress={handleEliminar}
               />
             ) : null}
           </View>

@@ -110,3 +110,39 @@ export async function guardarMascota(
     throw error;
   }
 }
+
+/////*****REVISAR ESTO POR FAVOR********
+export async function eliminarMascota(db: SQLiteDatabase, idMascota: number) {
+  const mascota = await db.getFirstAsync<{ imagen_perfil: string | null }>(
+    "SELECT imagen_perfil FROM mascota WHERE id_mascota=? AND id_usuario=(SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1)",
+    idMascota,
+  );
+  if (!mascota) {
+    throw new Error("No se encontró la mascota para eliminar.");
+  }
+
+  //INDICACIONES DE LOS CAMBIOS!!!!
+  // Los tratamientos de la mascota se eliminan automáticamente por la
+  // restricción ON DELETE CASCADE de la tabla tratamiento.
+  const resultado = await db.runAsync(
+    "DELETE FROM mascota WHERE id_mascota=? AND id_usuario=(SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1)",
+    idMascota,
+  );
+  if (resultado.changes !== 1) {
+    throw new Error("No se pudo eliminar la mascota.");
+  }
+
+  // La foto se borra DESPUÉS de eliminar el registro: si la base de datos
+  // fallara, la mascota conserva su foto. Solo se borran archivos que la app
+  // guardó en su propia carpeta "mascotas", y un fallo aquí no es crítico.
+  try {
+    const carpeta = new Directory(Paths.document, "mascotas");
+    const prefijo = `${carpeta.uri.replace(/\/$/, "")}/`;
+    if (mascota.imagen_perfil?.startsWith(prefijo)) {
+      const foto = new File(mascota.imagen_perfil);
+      if (foto.exists) foto.delete();
+    }
+  } catch {
+    console.warn("No se pudo borrar la foto de la mascota eliminada.");
+  }
+}
