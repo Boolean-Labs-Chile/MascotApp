@@ -1,7 +1,11 @@
+import { MascotasProvider } from "@/components/SidebarToggler";
+import { inicializarBase } from "@/store/database";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { SQLiteProvider } from "expo-sqlite";
+import { Suspense, useEffect } from "react";
+import { Text } from "react-native";
 
 import "@/global.css";
 
@@ -27,13 +31,23 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="mascota-nueva" />
-    </Stack>
+    <Suspense fallback={<Text>Cargando mascotas…</Text>}>
+      <SQLiteProvider
+        databaseName="mascotapp.db"
+        onInit={inicializarBase}
+        useSuspense
+      >
+        <MascotasProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="mascota-nueva" />
+          </Stack>
+        </MascotasProvider>
+      </SQLiteProvider>
+    </Suspense>
   );
 }

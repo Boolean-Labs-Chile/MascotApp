@@ -1,10 +1,13 @@
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import Input from "@/components/Input";
+import { useMascotas } from "@/components/SidebarToggler";
+import { guardarTratamiento } from "@/store/tratamientos";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useSQLiteContext } from "expo-sqlite";
+import { useRef, useState } from "react";
 import {
   Alert,
   Platform,
@@ -19,6 +22,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function TratamientoNuevo() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const db = useSQLiteContext();
+  const { activa } = useMascotas();
+  const guardando = useRef(false);
 
   const [nombreProducto, setNombreProducto] = useState("");
   const [fechaAplicacion, setFechaAplicacion] = useState(new Date());
@@ -30,21 +36,63 @@ export default function TratamientoNuevo() {
   const [showPickerVencimiento, setShowPickerVencimiento] = useState(false);
   const [showPickerDosis, setShowPickerDosis] = useState(false);
 
-  const handleGuardar = () => {
-    if (!nombreProducto.trim()) {
-      Alert.alert("Falta el nombre", "Ingresa el nombre del tratamiento.");
+  const avisar = (mensaje: string) => {
+    if (Platform.OS === "web") {
+      window.alert(mensaje);
+    } else {
+      Alert.alert("Tratamiento", mensaje);
+    }
+  };
+
+  const fechaSQL = (fecha: Date) =>
+    `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}-${String(fecha.getDate()).padStart(2, "0")}`;
+
+  const handleGuardar = async () => {
+    if (guardando.current) return;
+
+    if (!activa) {
+      avisar("Selecciona una mascota antes de guardar un tratamiento.");
       return;
     }
 
-    //ISSUE 9!!!
-    console.log("Guardando tratamiento:", {
-      nombreProducto,
-      fechaAplicacion,
-      fechaVencimiento,
-      fechaSiguienteDosis,
-      comentarios,
-    });
-    router.back();
+    if (!nombreProducto.trim()) {
+      avisar("Ingresa el nombre del tratamiento.");
+      return;
+    }
+
+    if (
+      [fechaAplicacion, fechaVencimiento, fechaSiguienteDosis].some((fecha) =>
+        Number.isNaN(fecha.getTime()),
+      )
+    ) {
+      avisar("Revisa las fechas del tratamiento.");
+      return;
+    }
+
+    guardando.current = true;
+
+    try {
+      const guardado = await guardarTratamiento(db, activa.id_mascota, {
+        nombreProducto: nombreProducto.trim(),
+        fechaAplicacion: fechaSQL(fechaAplicacion),
+        fechaVencimiento: fechaSQL(fechaVencimiento),
+        fechaSiguienteDosis: fechaSQL(fechaSiguienteDosis),
+        comentarios: comentarios.trim(),
+      });
+
+      if (!guardado) {
+        avisar("La mascota seleccionada ya no está disponible.");
+        return;
+      }
+
+      router.back();
+    } catch {
+      avisar(
+        "No se pudo guardar el tratamiento. Los datos siguen en el formulario; vuelve a intentarlo.",
+      );
+    } finally {
+      guardando.current = false;
+    }
   };
 
   const formatDate = (date: Date) => {
