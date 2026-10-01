@@ -6,7 +6,7 @@ export default function DrawerLayout() {
   return (
     <GestureHandlerRootView className="flex-1">
       <Drawer
-        drawerContent={(props) => <CustomDrawerContent props={props} />}
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
           headerShown: false,
           drawerStyle: {

@@ -40,8 +40,7 @@ function formatearFecha(fecha: string | null) {
 
 export default function Home() {
   const router = useRouter();
-  const { mascotas, activa, seleccionar, recargar, cargando, error } =
-    useMascotas();
+  const { activa, recargar, cargando, error } = useMascotas();
 
   const handleCardPress = (section: string) => {
     Alert.alert(section, "Esta sección estará disponible próximamente.");
@@ -61,7 +60,7 @@ export default function Home() {
               onPress={() =>
                 router.push({
                   pathname: "/mascota-nueva",
-                  params: { id: activa.id_mascota },
+                  params: { id: String(activa.id_mascota) },
                 })
               }
             />
@@ -86,40 +85,6 @@ export default function Home() {
           </View>
         ) : activa ? (
           <>
-            <Text className="mb-3 mt-5 font-sans-bold text-lg text-text">
-              Mis mascotas
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="gap-2 pb-2"
-            >
-              {mascotas.map((mascota) => {
-                const seleccionada = mascota.id_mascota === activa.id_mascota;
-                return (
-                  <Pressable
-                    key={mascota.id_mascota}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: seleccionada }}
-                    onPress={() => seleccionar(mascota.id_mascota)}
-                    className={`rounded-md border px-4 py-2 active:opacity-80 ${
-                      seleccionada
-                        ? "border-button-dark bg-button-dark"
-                        : "border-text/15 bg-white"
-                    }`}
-                  >
-                    <Text
-                      className={`font-sans-semibold text-sm ${
-                        seleccionada ? "text-white" : "text-text"
-                      }`}
-                    >
-                      {mascota.nombre}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-
             <View className="mt-4 items-center">
               {activa.imagen_web || activa.imagen_perfil ? (
                 <Image

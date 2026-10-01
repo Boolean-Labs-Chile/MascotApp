@@ -1,7 +1,7 @@
-import Button from "@/components/Button";
 import { obtenerMascotas, type Mascota } from "@/store/mascotas";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { DrawerActions } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import React, {
   createContext,
@@ -10,7 +10,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, Text } from "react-native";
 
 const MascotasContext = createContext<{
   mascotas: Mascota[];
@@ -66,82 +66,18 @@ interface SidebarTogglerProps {
 }
 
 export function SidebarToggler({ nombreMascota }: SidebarTogglerProps) {
-  const router = useRouter();
-  const { mascotas, activa, seleccionar, recargar, error } = useMascotas();
-  const [abierto, setAbierto] = useState(false);
+  const navigation = useNavigation();
+  const { activa } = useMascotas();
 
   return (
-    <>
-      <Pressable
-        onPress={() => {
-          setAbierto(true);
-          void recargar().catch(() => undefined);
-        }}
-        className="flex-row justify-between gap-2 rounded-full border bg-white px-6 py-4 shadow-sm active:opacity-80"
-      >
-        <Ionicons name="menu" size={20} color="#000000" />
-        <Text className="align-middle font-sans-semibold text-sm text-[#000000]">
-          {activa?.nombre ?? nombreMascota ?? "Mis mascotas"}
-        </Text>
-      </Pressable>
-      <Modal
-        visible={abierto}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setAbierto(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            backgroundColor: "rgba(0,0,0,0.35)",
-          }}
-        >
-          <View
-            className="bg-background px-6 py-12"
-            style={{ width: "80%", maxWidth: 340 }}
-          >
-            <Button
-              label="Cerrar menú"
-              onPress={() => setAbierto(false)}
-              variant="light"
-            />
-            <ScrollView className="my-6">
-              {error ? <Text>{error}</Text> : null}
-              {!mascotas.length && !error ? (
-                <Text>Aún no hay mascotas registradas.</Text>
-              ) : null}
-              {mascotas.map((mascota) => (
-                <Pressable
-                  key={mascota.id_mascota}
-                  className="py-4"
-                  onPress={() => {
-                    seleccionar(mascota.id_mascota);
-                    setAbierto(false);
-                  }}
-                >
-                  <Text className="font-sans-semibold text-base text-text">
-                    {mascota.nombre}
-                    {activa?.id_mascota === mascota.id_mascota ? " ✓" : ""}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-            <Button
-              label="Añadir mascota"
-              onPress={() => {
-                setAbierto(false);
-                router.push("/mascota-nueva");
-              }}
-            />
-          </View>
-          <Pressable
-            accessibilityLabel="Cerrar menú"
-            style={{ flex: 1 }}
-            onPress={() => setAbierto(false)}
-          />
-        </View>
-      </Modal>
-    </>
+    <Pressable
+      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+      className="flex-row justify-between gap-2 rounded-full border bg-white px-6 py-4 shadow-sm active:opacity-80"
+    >
+      <Ionicons name="menu" size={20} color="#000000" />
+      <Text className="align-middle font-sans-semibold text-sm text-[#000000]">
+        {activa?.nombre ?? nombreMascota ?? "Mis mascotas"}
+      </Text>
+    </Pressable>
   );
 }

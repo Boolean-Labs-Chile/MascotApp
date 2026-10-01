@@ -5,7 +5,7 @@ import RadioButton from "@/components/RadioButton";
 import { useMascotas } from "@/components/SidebarToggler";
 import { guardarMascota } from "@/store/mascotas";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import * as ImagePicker from "expo-image-picker";
+import type { ImagePickerAsset } from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useRef, useState } from "react";
@@ -79,6 +79,37 @@ export default function MascotaNueva() {
   const fechaSQL = (fecha: Date) =>
     `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}-${String(fecha.getDate()).padStart(2, "0")}`;
 
+  const handleImageSelected = (asset: ImagePickerAsset) => {
+    const nombreArchivo = (asset.fileName ?? asset.uri).split(/[?#]/)[0];
+    const sufijo = nombreArchivo.split(".").pop()?.toLowerCase();
+    const formatos: Record<string, string> = {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      webp: "image/webp",
+    };
+    const tipo = asset.mimeType ?? formatos[sufijo ?? ""] ?? "";
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(tipo)) {
+      avisar("Selecciona una imagen JPG, PNG o WebP.");
+      return;
+    }
+    if ((asset.fileSize ?? 0) > 5 * 1024 * 1024) {
+      avisar("La foto debe pesar menos de 5 MB.");
+      return;
+    }
+    if (Platform.OS === "web" && !asset.base64) {
+      avisar("No se pudo leer la foto. Selecciónala nuevamente.");
+      return;
+    }
+
+    setFotoUri(
+      Platform.OS === "web" ? `data:${tipo};base64,${asset.base64}` : asset.uri,
+    );
+    setExtension(tipo === "image/jpeg" ? "jpg" : tipo.split("/")[1]);
+    setFotoNueva(true);
+  };
+
   const handleGuardar = async () => {
     if (guardando.current || cargando) return;
     if (id && !existente) return avisar("Esta mascota ya no está disponible.");
@@ -135,62 +166,6 @@ export default function MascotaNueva() {
     }
   };
 
-  const handleSelectPhoto = async () => {
-    if (guardando.current) return;
-    try {
-      if (Platform.OS !== "web") {
-        const permission =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-        if (!permission.granted) {
-          Alert.alert(
-            "Permiso denegado",
-            "Necesitamos acceso a tus fotos para elegir la imagen de tu mascota.",
-          );
-          return;
-        }
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.7,
-        base64: Platform.OS === "web",
-      });
-
-      if (!result.canceled) {
-        const asset = result.assets[0];
-        const sufijo = (asset.fileName ?? asset.uri)
-          .split(".")
-          .pop()
-          ?.toLowerCase();
-        const formatos: Record<string, string> = {
-          jpg: "image/jpeg",
-          jpeg: "image/jpeg",
-          png: "image/png",
-          webp: "image/webp",
-        };
-        const tipo = asset.mimeType ?? formatos[sufijo ?? ""] ?? "";
-        if (!["image/jpeg", "image/png", "image/webp"].includes(tipo))
-          return avisar("Selecciona una imagen JPG, PNG o WebP.");
-        if ((asset.fileSize ?? 0) > 5 * 1024 * 1024)
-          return avisar("La foto debe pesar menos de 5 MB.");
-        if (Platform.OS === "web" && !asset.base64)
-          return avisar("No se pudo leer la foto. Selecciónala nuevamente.");
-        setFotoUri(
-          Platform.OS === "web"
-            ? `data:${tipo};base64,${asset.base64}`
-            : asset.uri,
-        );
-        setExtension(tipo === "image/jpeg" ? "jpg" : tipo.split("/")[1]);
-        setFotoNueva(true);
-      }
-    } catch {
-      avisar("No se pudo abrir la foto. Vuelve a intentarlo.");
-    }
-  };
-
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("es-ES", {
       day: "2-digit",
@@ -208,12 +183,15 @@ export default function MascotaNueva() {
           </Text>
           <Text className="mb-6 text-base font-normal text-text opacity-70">
             {id
-            ? "Actualiza la información de tu mascota"
-            : "Completa la información de tu nueva mascota"}
+              ? "Actualiza la información de tu mascota"
+              : "Completa la información de tu nueva mascota"}
           </Text>
 
           {/* Foto de home */}
-          <ImageSelector imageUri={fotoUri} onImageSelected={setFotoUri} />
+          <ImageSelector
+            imageUri={fotoUri}
+            onImageSelected={handleImageSelected}
+          />
 
           {/* Nombre */}
           <Input
@@ -253,89 +231,89 @@ export default function MascotaNueva() {
             />
           </View>
 
-        {/* Fecha de nacimiento */}
-        <View className="mb-4">
-          <Text className="mb-1 text-base font-semibold text-text">
-            Fecha de nacimiento
-          </Text>
-          <TouchableOpacity
-            className="rounded-xl border border-gray-200 bg-white px-4 py-3"
-            onPress={() => setShowPickerNacimiento(true)}
-          >
-            <Text className="text-base font-normal text-text">
-              {formatDate(fechaNacimiento)}
+          {/* Fecha de nacimiento */}
+          <View className="mb-4">
+            <Text className="mb-1 text-base font-semibold text-text">
+              Fecha de nacimiento
             </Text>
-          </TouchableOpacity>
-          {showPickerNacimiento &&
-            (Platform.OS === "web" ? (
-              <input
-                aria-label="Fecha de nacimiento"
-                type="date"
-                value={fechaSQL(fechaNacimiento)}
-                max={fechaSQL(new Date())}
-                onChange={(event) => {
-                  if (event.target.value)
-                    setFechaNacimiento(
-                      new Date(event.target.value + "T12:00:00"),
-                    );
-                }}
-              />
-            ) : (
-              <DateTimePicker
-                value={fechaNacimiento}
-                mode="date"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
-                onChange={(event, selectedDate) => {
-                  setShowPickerNacimiento(false);
-                  if (selectedDate) {
-                    setFechaNacimiento(selectedDate);
-                  }
-                }}
-              />
-            ))}
-        </View>
+            <TouchableOpacity
+              className="rounded-xl border border-gray-200 bg-white px-4 py-3"
+              onPress={() => setShowPickerNacimiento(true)}
+            >
+              <Text className="text-base font-normal text-text">
+                {formatDate(fechaNacimiento)}
+              </Text>
+            </TouchableOpacity>
+            {showPickerNacimiento &&
+              (Platform.OS === "web" ? (
+                <input
+                  aria-label="Fecha de nacimiento"
+                  type="date"
+                  value={fechaSQL(fechaNacimiento)}
+                  max={fechaSQL(new Date())}
+                  onChange={(event) => {
+                    if (event.target.value)
+                      setFechaNacimiento(
+                        new Date(event.target.value + "T12:00:00"),
+                      );
+                  }}
+                />
+              ) : (
+                <DateTimePicker
+                  value={fechaNacimiento}
+                  mode="date"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={(event, selectedDate) => {
+                    setShowPickerNacimiento(false);
+                    if (selectedDate) {
+                      setFechaNacimiento(selectedDate);
+                    }
+                  }}
+                />
+              ))}
+          </View>
 
-        {/* Fecha de adopción */}
-        <View className="mb-4">
-          <Text className="mb-1 text-base font-semibold text-text">
-            Fecha de adopción
-          </Text>
-          <TouchableOpacity
-            className="rounded-xl border border-gray-200 bg-white px-4 py-3"
-            onPress={() => setShowPickerAdopcion(true)}
-          >
-            <Text className="text-base font-normal text-text">
-              {formatDate(fechaAdopcion)}
+          {/* Fecha de adopción */}
+          <View className="mb-4">
+            <Text className="mb-1 text-base font-semibold text-text">
+              Fecha de adopción
             </Text>
-          </TouchableOpacity>
-          {showPickerAdopcion &&
-            (Platform.OS === "web" ? (
-              <input
-                aria-label="Fecha de adopción"
-                type="date"
-                value={fechaSQL(fechaAdopcion)}
-                min={fechaSQL(fechaNacimiento)}
-                onChange={(event) => {
-                  if (event.target.value)
-                    setFechaAdopcion(
-                      new Date(event.target.value + "T12:00:00"),
-                    );
-                }}
-              />
-            ) : (
-              <DateTimePicker
-                value={fechaAdopcion}
-                mode="date"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
-                onChange={(event, selectedDate) => {
-                  setShowPickerAdopcion(false);
-                  if (selectedDate) {
-                    setFechaAdopcion(selectedDate);
-                  }
-                }}
-              />
-            ))}
-        </View>
+            <TouchableOpacity
+              className="rounded-xl border border-gray-200 bg-white px-4 py-3"
+              onPress={() => setShowPickerAdopcion(true)}
+            >
+              <Text className="text-base font-normal text-text">
+                {formatDate(fechaAdopcion)}
+              </Text>
+            </TouchableOpacity>
+            {showPickerAdopcion &&
+              (Platform.OS === "web" ? (
+                <input
+                  aria-label="Fecha de adopción"
+                  type="date"
+                  value={fechaSQL(fechaAdopcion)}
+                  min={fechaSQL(fechaNacimiento)}
+                  onChange={(event) => {
+                    if (event.target.value)
+                      setFechaAdopcion(
+                        new Date(event.target.value + "T12:00:00"),
+                      );
+                  }}
+                />
+              ) : (
+                <DateTimePicker
+                  value={fechaAdopcion}
+                  mode="date"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={(event, selectedDate) => {
+                    setShowPickerAdopcion(false);
+                    if (selectedDate) {
+                      setFechaAdopcion(selectedDate);
+                    }
+                  }}
+                />
+              ))}
+          </View>
 
           {/* Especie */}
           <Input
@@ -373,25 +351,25 @@ export default function MascotaNueva() {
           {/* Botón guardar */}
           <View className="mt-6">
             <Button
-            label={
-              ocupado
-                ? "Guardando…"
-                : id
-                  ? "Guardar cambios"
-                  : "Guardar mascota"
-            }
-            onPress={handleGuardar}
-          />
-            {id ? (
-            <Button
-              label="Cancelar edición"
-              variant="light"
-              onPress={() => {
-                if (!guardando.current) router.replace("/home");
-              }}
+              label={
+                ocupado
+                  ? "Guardando…"
+                  : id
+                    ? "Guardar cambios"
+                    : "Guardar mascota"
+              }
+              onPress={handleGuardar}
             />
-          ) : null}
-        </View>
+            {id ? (
+              <Button
+                label="Cancelar edición"
+                variant="light"
+                onPress={() => {
+                  if (!guardando.current) router.replace("/home");
+                }}
+              />
+            ) : null}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

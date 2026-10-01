@@ -1,9 +1,17 @@
+import type { ImagePickerAsset } from "expo-image-picker";
 import * as ImagePicker from "expo-image-picker";
-import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export interface ImageSelectorProps {
   imageUri: string | null;
-  onImageSelected: (uri: string | null) => void;
+  onImageSelected: (asset: ImagePickerAsset) => void;
 }
 
 export function ImageSelector({
@@ -11,25 +19,35 @@ export function ImageSelector({
   onImageSelected,
 }: ImageSelectorProps) {
   const handleSelectPhoto = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    try {
+      if (Platform.OS !== "web") {
+        const permission =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (!permission.granted) {
-      Alert.alert(
-        "Permiso denegado",
-        "Necesitamos acceso a tus fotos para elegir la imagen de tu mascota.",
-      );
-      return;
-    }
+        if (!permission.granted) {
+          Alert.alert(
+            "Permiso denegado",
+            "Necesitamos acceso a tus fotos para elegir la imagen de tu mascota.",
+          );
+          return;
+        }
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+        base64: Platform.OS === "web",
+      });
 
-    if (!result.canceled) {
-      onImageSelected(result.assets[0].uri);
+      if (!result.canceled) {
+        onImageSelected(result.assets[0]);
+      }
+    } catch {
+      const mensaje = "No se pudo abrir la foto. Vuelve a intentarlo.";
+      if (Platform.OS === "web") window.alert(mensaje);
+      else Alert.alert("Mascota", mensaje);
     }
   };
 
