@@ -23,3 +23,25 @@
   - **Permisos:** Se configura automáticamente en Expo Go / Development Builds, o mediante el plugin en app.json (app.config.js) para personalizar los mensajes de solicitud de permisos (cámara y biblioteca de fotos)
   - **Uso:** Uso: Solicitar permisos en tiempo de ejecución con `requestMediaLibraryPermissionsAsync()` / `requestCameraPermissionsAsync()` y lanzar el selector con `launchImageLibraryAsync()` o `launchCameraAsync()`.
 - **Responsable:** @gramzdev
+
+## @react-navigation/drawer
+
+- **Versión**: ^7.5.0
+- **Finalidad:** Proporcionar el navegador de tipo cajón (Drawer) de React Navigation, que `expo-router` expone como `expo-router/drawer`, para el menú lateral de la app.
+- **Motivo:** Permitir alternar entre los perfiles de mascotas desde un panel deslizable, accesible con un botón en el header o arrastrando desde el borde de la pantalla.
+- **Categoría:** dependencies
+- **Config:** Ninguna adicional
+  - **Instalación:** Mediante `npx expo install @react-navigation/drawer`
+  - **Uso:** Importar `Drawer` desde `expo-router/drawer` dentro de un `_layout.tsx`, y `DrawerContentScrollView` desde `@react-navigation/drawer` para el contenido propio del panel.
+- **Responsable:** @gramzdev
+
+## react-native-gesture-handler
+
+- **Versión**: ~2.28.0
+- **Finalidad**: Proveer los gestos que requiere el `Drawer` (deslizar para abrir y cerrar el menú lateral).
+- **Motivo**: `@react-navigation/drawer` no funciona sin esta librería. Pasó a ser obligatoria al adoptar el Sidebar (Issue #3); hasta entonces solo la transitaba Reanimated.
+- **Categoría:** dependencies
+- **Config:**
+  - **Instalación:** Mediante `npx expo install react-native-gesture-handler`
+  - **Uso:** Envolver el `Drawer` con `GestureHandlerRootView` en `app/(drawer)/_layout.tsx`, y alternar el menú con `DrawerActions.toggleDrawer()` desde `components/SidebarToggler.tsx`. Sin el `GestureHandlerRootView` en la raíz del Drawer el menú no responde.
+- **Responsable:** @gramzdev

@@ -2,7 +2,8 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Registrarse() {
   const router = useRouter();
@@ -19,16 +20,7 @@ export default function Registrarse() {
   };
 
   return (
-    <View className="flex-1 bg-background">
-      <TouchableOpacity
-        className="mt-6 items-center"
-        onPress={() => router.back()}
-      >
-        <Text className="text-sm font-semibold text-text opacity-80">
-          Volver al inicio
-        </Text>
-      </TouchableOpacity>
-
+    <SafeAreaView className="flex-1 bg-background">
       <View className="flex-1 justify-center px-8">
         <View className="mb-8">
           <Text className="mb-2 text-3xl font-bold text-text">
@@ -73,6 +65,6 @@ export default function Registrarse() {
 
         <Button label="Crear cuenta" onPress={handleRegister} />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

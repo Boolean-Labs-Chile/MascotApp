@@ -1,12 +1,13 @@
+import Button from "@/components/Button";
 import { useRouter } from "expo-router";
 import { Image, Text, View } from "react-native";
-import Button from "../components/Button";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const router = useRouter();
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       <View className="mx-auto mb-8 mt-16 h-72 w-72 items-center justify-center">
         <Image
           source={require("../assets/images/logo.png")}
@@ -33,6 +34,6 @@ export default function Index() {
           variant="light"
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

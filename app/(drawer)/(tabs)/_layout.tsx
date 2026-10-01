@@ -1,10 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome6, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarActiveTintColor: "#46ecd5",
         tabBarInactiveTintColor: "#9CA3AF",
         tabBarStyle: {
@@ -18,7 +19,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="perfil"
+        name="home"
         options={{
           title: "Perfil",
           tabBarIcon: ({ color, size }) => (
@@ -32,7 +33,11 @@ export default function TabsLayout() {
           title: "Registro Médico",
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle" size={size} color={color} />
+            <MaterialIcons
+              name="medical-information"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -41,7 +46,7 @@ export default function TabsLayout() {
         options={{
           title: "Contactos",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle" size={size} color={color} />
+            <FontAwesome6 name="contact-book" size={size} color={color} />
           ),
         }}
       />
