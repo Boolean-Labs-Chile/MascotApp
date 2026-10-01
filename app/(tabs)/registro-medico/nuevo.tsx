@@ -2,6 +2,7 @@ import Button from "@/components/Button";
 import Card from "@/components/Card";
 import Input from "@/components/Input";
 import { useMascotas } from "@/components/SidebarToggler";
+import { guardarTratamiento } from "@/store/tratamientos";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
@@ -71,30 +72,15 @@ export default function TratamientoNuevo() {
     guardando.current = true;
 
     try {
-      const resultado = await db.runAsync(
-        `INSERT INTO tratamiento (
-          id_mascota,
-          nombre_producto,
-          fecha_aplicacion,
-          fecha_vencimiento,
-          fecha_siguiente_dosis,
-          comentarios
-        )
-        SELECT id_mascota, ?, ?, ?, ?, ?
-        FROM mascota
-        WHERE id_mascota = ?
-          AND id_usuario = (
-            SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1
-          )`,
-        nombreProducto.trim(),
-        fechaSQL(fechaAplicacion),
-        fechaSQL(fechaVencimiento),
-        fechaSQL(fechaSiguienteDosis),
-        comentarios.trim(),
-        activa.id_mascota,
-      );
+      const guardado = await guardarTratamiento(db, activa.id_mascota, {
+        nombreProducto: nombreProducto.trim(),
+        fechaAplicacion: fechaSQL(fechaAplicacion),
+        fechaVencimiento: fechaSQL(fechaVencimiento),
+        fechaSiguienteDosis: fechaSQL(fechaSiguienteDosis),
+        comentarios: comentarios.trim(),
+      });
 
-      if (resultado.changes !== 1) {
+      if (!guardado) {
         avisar("La mascota seleccionada ya no está disponible.");
         return;
       }

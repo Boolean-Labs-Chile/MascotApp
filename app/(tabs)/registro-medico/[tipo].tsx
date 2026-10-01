@@ -1,21 +1,13 @@
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import { useMascotas } from "@/components/SidebarToggler";
+import { obtenerTratamientos, type Tratamiento } from "@/store/tratamientos";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-type Tratamiento = {
-  id: number;
-  nombreProducto: string;
-  fechaAplicacion: string;
-  fechaVencimiento: string;
-  fechaSiguienteDosis: string;
-  comentarios: string;
-};
 
 //ISSUE 9!!!!
 
@@ -60,23 +52,7 @@ export default function RegistroPorTipo() {
 
       const cargar = async () => {
         try {
-          const filas = await db.getAllAsync<Tratamiento>(
-            `SELECT
-              t.id_tratamiento AS id,
-              t.nombre_producto AS nombreProducto,
-              COALESCE(t.fecha_aplicacion, '') AS fechaAplicacion,
-              COALESCE(t.fecha_vencimiento, '') AS fechaVencimiento,
-              COALESCE(t.fecha_siguiente_dosis, '') AS fechaSiguienteDosis,
-              COALESCE(t.comentarios, '') AS comentarios
-            FROM tratamiento t
-            INNER JOIN mascota m ON m.id_mascota = t.id_mascota
-            WHERE t.id_mascota = ?
-              AND m.id_usuario = (
-                SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1
-              )
-            ORDER BY t.fecha_aplicacion DESC, t.id_tratamiento DESC`,
-            idMascota,
-          );
+          const filas = await obtenerTratamientos(db, idMascota);
 
           if (vigente) {
             setTratamientos(filas);

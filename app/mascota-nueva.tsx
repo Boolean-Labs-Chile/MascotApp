@@ -2,10 +2,10 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import RadioButton from "@/components/RadioButton";
 import { useMascotas } from "@/components/SidebarToggler";
+import { guardarMascota } from "@/store/mascotas";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { Directory, File, Paths } from "expo-file-system";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useRef, useState } from "react";
@@ -96,68 +96,36 @@ export default function MascotaNueva() {
     }
     guardando.current = true;
     setOcupado(true);
-    let copia: File | null = null;
     try {
-      let imagen = existente?.imagen_perfil ?? null;
-      let imagenWeb = existente?.imagen_web ?? null;
-      if (fotoNueva && fotoUri) {
-        if (Platform.OS === "web") {
-          imagenWeb = fotoUri;
-          imagen = null;
-        } else {
-          const carpeta = new Directory(Paths.document, "mascotas");
-          carpeta.create({ idempotent: true, intermediates: true });
-          copia = new File(
-            carpeta,
-            `${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`,
-          );
-          new File(fotoUri).copy(copia);
-          imagen = copia.uri;
-          imagenWeb = null;
-        }
-      }
-      const datos = [
-        nombre.trim(),
-        genero,
-        Number(esterilizado),
-        especie.trim(),
-        fechaSQL(fechaNacimiento),
-        fechaSQL(fechaAdopcion),
-        color.trim(),
-        signosDistintivos.trim(),
-        raza.trim(),
-        imagen,
-        imagenWeb,
-      ];
-      let mascotaId: number;
-      if (existente) {
-        const resultado = await db.runAsync(
-          `UPDATE mascota SET nombre=?, genero=?, estado_esterilizacion=?, tipo_animal=?, fecha_nacimiento=?, fecha_adopcion=?, color=?, rasgos=?, raza=?, imagen_perfil=?, imagen_web=? WHERE id_mascota=? AND id_usuario=(SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1)`,
-          ...datos,
-          existente.id_mascota,
-        );
-        if (resultado.changes !== 1)
-          throw new Error("No se encontró la mascota para actualizar.");
-        mascotaId = existente.id_mascota;
-      } else {
-        const resultado = await db.runAsync(
-          `INSERT INTO mascota (nombre, genero, estado_esterilizacion, tipo_animal, fecha_nacimiento, fecha_adopcion, color, rasgos, raza, imagen_perfil, imagen_web, id_usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1))`,
-          ...datos,
-        );
-        mascotaId = resultado.lastInsertRowId;
-      }
-      copia = null;
+      const mascotaId = await guardarMascota(
+        db,
+        {
+          nombre: nombre.trim(),
+          genero,
+          esterilizado,
+          tipoAnimal: especie.trim(),
+          fechaNacimiento: fechaSQL(fechaNacimiento),
+          fechaAdopcion: fechaSQL(fechaAdopcion),
+          color: color.trim(),
+          rasgos: signosDistintivos.trim(),
+          raza: raza.trim(),
+          imagenPerfil: existente?.imagen_perfil ?? null,
+          imagenWeb: existente?.imagen_web ?? null,
+          fotoNueva:
+            fotoNueva && fotoUri
+              ? {
+                  uri: fotoUri,
+                  extension,
+                  plataforma: Platform.OS === "web" ? "web" : "nativa",
+                }
+              : undefined,
+        },
+        existente?.id_mascota,
+      );
       await recargar().catch(() => undefined);
       seleccionar(mascotaId);
       router.replace("/(tabs)/perfil");
     } catch {
-      try {
-        if (copia?.exists) copia.delete();
-      } catch {
-        console.warn(
-          "No se pudo retirar la copia de la foto que no se guardó.",
-        );
-      }
       avisar(
         "No se pudo guardar la mascota. Tus datos siguen en el formulario; vuelve a intentarlo.",
       );

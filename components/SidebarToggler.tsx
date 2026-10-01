@@ -1,3 +1,5 @@
+import Button from "@/components/Button";
+import { obtenerMascotas, type Mascota } from "@/store/mascotas";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
@@ -9,22 +11,6 @@ import React, {
   useState,
 } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import Button from "@/components/Button";
-
-export type Mascota = {
-  id_mascota: number;
-  nombre: string;
-  genero: "macho" | "hembra";
-  estado_esterilizacion: number;
-  tipo_animal: string | null;
-  fecha_nacimiento: string | null;
-  fecha_adopcion: string | null;
-  color: string | null;
-  raza: string | null;
-  rasgos: string | null;
-  imagen_perfil: string | null;
-  imagen_web: string | null;
-};
 
 const MascotasContext = createContext<{
   mascotas: Mascota[];
@@ -49,9 +35,7 @@ export function MascotasProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState("");
   const recargar = useCallback(async () => {
     try {
-      const filas = await db.getAllAsync<Mascota>(
-        "SELECT * FROM mascota WHERE id_usuario = (SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1) ORDER BY id_mascota",
-      );
+      const filas = await obtenerMascotas(db);
       setMascotas(filas);
       setError("");
     } catch {
