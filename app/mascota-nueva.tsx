@@ -125,7 +125,7 @@ export default function MascotaNueva() {
       );
       await recargar().catch(() => undefined);
       seleccionar(mascotaId);
-      router.replace("/(tabs)/perfil");
+      router.replace("/home");
     } catch {
       avisar(
         "No se pudo guardar la mascota. Tus datos siguen en el formulario; vuelve a intentarlo.",
@@ -387,7 +387,7 @@ export default function MascotaNueva() {
               label="Cancelar edición"
               variant="light"
               onPress={() => {
-                if (!guardando.current) router.replace("/(tabs)/perfil");
+                if (!guardando.current) router.replace("/home");
               }}
             />
           ) : null}
