@@ -1,6 +1,17 @@
 import { Directory, File, Paths } from "expo-file-system";
 import type { SQLiteDatabase } from "expo-sqlite";
 
+export class NombreMascotaDuplicadoError extends Error {
+  constructor() {
+    super("Ya tienes una mascota con ese nombre. Elige otro.");
+    this.name = "NombreMascotaDuplicadoError";
+  }
+}
+
+function normalizarNombreMascota(nombre: string) {
+  return nombre.normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
 export type Mascota = {
   id_mascota: number;
   nombre: string;
@@ -46,6 +57,29 @@ export async function guardarMascota(
   datos: DatosMascota,
   idMascota?: number,
 ) {
+  const nombreNormalizado = normalizarNombreMascota(datos.nombre);
+
+  const nombresGuardados = await db.getAllAsync<{
+    id_mascota: number;
+    nombre: string;
+  }>(
+    `SELECT id_mascota, nombre
+     FROM mascota
+     WHERE id_usuario = (
+       SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1
+     )`,
+  );
+
+  const nombreOcupado = nombresGuardados.some(
+    (mascota) =>
+      mascota.id_mascota !== idMascota &&
+      normalizarNombreMascota(mascota.nombre) === nombreNormalizado,
+  );
+
+  if (nombreOcupado) {
+    throw new NombreMascotaDuplicadoError();
+  }
+
   let copia: File | null = null;
 
   try {
@@ -69,7 +103,7 @@ export async function guardarMascota(
     }
 
     const valores = [
-      datos.nombre,
+      datos.nombre.normalize("NFC").trim().replace(/\s+/g, " "),
       datos.genero,
       Number(datos.esterilizado),
       datos.tipoAnimal,

@@ -3,7 +3,11 @@ import { ImageSelector } from "@/components/ImageSelector";
 import Input from "@/components/Input";
 import RadioButton from "@/components/RadioButton";
 import { useMascotas } from "@/components/SidebarToggler";
-import { eliminarMascota, guardarMascota } from "@/store/mascotas";
+import {
+  eliminarMascota,
+  guardarMascota,
+  NombreMascotaDuplicadoError,
+} from "@/store/mascotas";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import type { ImagePickerAsset } from "expo-image-picker";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
@@ -249,12 +253,18 @@ export default function MascotaNueva() {
       await recargar().catch(() => undefined);
       seleccionar(mascotaId);
       router.replace("/home");
-    } catch {
+    } catch (error) {
+      guardando.current = false;
+      setOcupado(false);
+
+      if (error instanceof NombreMascotaDuplicadoError) {
+        avisar(error.message);
+        return;
+      }
+
       avisar(
         "No se pudo guardar la mascota. Tus datos siguen en el formulario; vuelve a intentarlo.",
       );
-      guardando.current = false;
-      setOcupado(false);
     }
   };
 
