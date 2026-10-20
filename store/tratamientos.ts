@@ -1,4 +1,5 @@
 import type { SQLiteDatabase } from "expo-sqlite";
+import { obtenerIdUsuarioLocal } from "./usuarios";
 
 export type Tratamiento = {
   id: number;
@@ -21,6 +22,8 @@ export async function obtenerTratamientos(
   db: SQLiteDatabase,
   idMascota: number,
 ) {
+  const idUsuario = await obtenerIdUsuarioLocal(db);
+
   return db.getAllAsync<Tratamiento>(
     `SELECT
       t.id_tratamiento AS id,
@@ -32,11 +35,10 @@ export async function obtenerTratamientos(
     FROM tratamiento t
     INNER JOIN mascota m ON m.id_mascota = t.id_mascota
     WHERE t.id_mascota = ?
-      AND m.id_usuario = (
-        SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1
-      )
+      AND m.id_usuario = ?
     ORDER BY t.fecha_aplicacion DESC, t.id_tratamiento DESC`,
     idMascota,
+    idUsuario,
   );
 }
 
@@ -45,6 +47,8 @@ export async function guardarTratamiento(
   idMascota: number,
   datos: DatosTratamiento,
 ) {
+  const idUsuario = await obtenerIdUsuarioLocal(db);
+
   const resultado = await db.runAsync(
     `INSERT INTO tratamiento (
       id_mascota,
@@ -57,15 +61,14 @@ export async function guardarTratamiento(
     SELECT id_mascota, ?, ?, ?, ?, ?
     FROM mascota
     WHERE id_mascota = ?
-      AND id_usuario = (
-        SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1
-      )`,
+      AND id_usuario = ?`,
     datos.nombreProducto,
     datos.fechaAplicacion,
     datos.fechaVencimiento,
     datos.fechaSiguienteDosis,
     datos.comentarios,
     idMascota,
+    idUsuario,
   );
 
   return resultado.changes === 1;
@@ -78,6 +81,8 @@ export async function actualizarTratamiento(
   idTratamiento: number,
   datos: DatosTratamiento,
 ) {
+  const idUsuario = await obtenerIdUsuarioLocal(db);
+
   const resultado = await db.runAsync(
     `UPDATE tratamiento
      SET nombre_producto = ?,
@@ -89,9 +94,7 @@ export async function actualizarTratamiento(
        AND id_mascota = ?
        AND id_mascota IN (
          SELECT id_mascota FROM mascota
-         WHERE id_usuario = (
-           SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1
-         )
+         WHERE id_usuario = ?
        )`,
     datos.nombreProducto,
     datos.fechaAplicacion,
@@ -100,6 +103,7 @@ export async function actualizarTratamiento(
     datos.comentarios,
     idTratamiento,
     idMascota,
+    idUsuario,
   );
 
   return resultado.changes === 1;

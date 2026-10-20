@@ -57,11 +57,19 @@ export async function inicializarBase(db: SQLiteDatabase) {
         );
       }
     }
-    const usuario = await db.getFirstAsync(
-      "SELECT id_usuario FROM usuario LIMIT 1",
+    const columnasUsuario = await db.getAllAsync<{ name: string }>(
+      "PRAGMA table_info(usuario)",
     );
-    if (!usuario) {
-      await db.runAsync("INSERT INTO usuario (nombre) VALUES (?)", "Mi perfil");
+
+    if (!columnasUsuario.some(({ name }) => name === "firebase_uid")) {
+      await db.execAsync("ALTER TABLE usuario ADD COLUMN firebase_uid TEXT");
     }
+
+    // Cada cuenta de Firebase tiene un único usuario local. Ese usuario se
+    // crea al iniciar sesión (store/usuarios.ts), no aquí: así no quedan
+    // usuarios sin firebase_uid en instalaciones nuevas.
+    await db.execAsync(
+      "CREATE UNIQUE INDEX IF NOT EXISTS usuario_firebase_uid_unico ON usuario(firebase_uid)",
+    );
   });
 }

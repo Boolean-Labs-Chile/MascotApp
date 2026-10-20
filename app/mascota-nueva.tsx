@@ -262,8 +262,12 @@ export default function MascotaNueva() {
         return;
       }
 
+      // Muestra el error real mientras se desarrolla (no aparece en producción)
+      console.error("Error al guardar la mascota:", error);
+
       avisar(
-        "No se pudo guardar la mascota. Tus datos siguen en el formulario; vuelve a intentarlo.",
+        "No se pudo guardar la mascota. Tus datos siguen en el formulario; vuelve a intentarlo." +
+          (__DEV__ ? `\n\nDetalle: ${error instanceof Error ? error.message : String(error)}` : ""),
       );
     }
   };
