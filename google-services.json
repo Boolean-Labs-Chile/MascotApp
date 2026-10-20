@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "259001290020",
+    "project_id": "mascotapp-usm",
+    "storage_bucket": "mascotapp-usm.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:259001290020:android:357c76a156ca12320137b1",
+        "android_client_info": {
+          "package_name": "cl.booleanlabs.mascotapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdoJHGq5uFjU1UGb03xTAc5c_fL3Cc42w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

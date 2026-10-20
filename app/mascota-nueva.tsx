@@ -8,6 +8,7 @@ import {
   guardarMascota,
   NombreMascotaDuplicadoError,
 } from "@/store/mascotas";
+import { respaldarMascota } from "@/store/respaldo-firestore";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import type { ImagePickerAsset } from "expo-image-picker";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
@@ -247,6 +248,10 @@ export default function MascotaNueva() {
               : undefined,
         },
         existente?.id_mascota,
+      );
+            // Copia en Firestore. No bloquea: si falla, la mascota ya está en SQLite.
+      void respaldarMascota(db, mascotaId).catch((error) =>
+        console.warn("No se pudo respaldar en Firestore:", error),
       );
       // Se guardó: la salida a /home es intencional
       saliendo.current = true;
