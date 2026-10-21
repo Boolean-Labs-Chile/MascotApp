@@ -249,7 +249,7 @@ export default function MascotaNueva() {
         },
         existente?.id_mascota,
       );
-            // Copia en Firestore. No bloquea: si falla, la mascota ya está en SQLite.
+      // Copia en Firestore. No bloquea: si falla, la mascota ya está en SQLite.
       void respaldarMascota(db, mascotaId).catch((error) =>
         console.warn("No se pudo respaldar en Firestore:", error),
       );
@@ -272,7 +272,9 @@ export default function MascotaNueva() {
 
       avisar(
         "No se pudo guardar la mascota. Tus datos siguen en el formulario; vuelve a intentarlo." +
-          (__DEV__ ? `\n\nDetalle: ${error instanceof Error ? error.message : String(error)}` : ""),
+          (__DEV__
+            ? `\n\nDetalle: ${error instanceof Error ? error.message : String(error)}`
+            : ""),
       );
     }
   };

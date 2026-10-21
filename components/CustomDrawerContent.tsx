@@ -15,25 +15,25 @@ export function CustomDrawerContent(props: DrawerContentComponentProps) {
   const { mascotas, activa, seleccionar, cargando, error, recargar } =
     useMascotas();
 
-    const cierreEnCurso = useRef(false);
+  const cierreEnCurso = useRef(false);
 
-const handleCerrarSesion = async () => {
-  if (cierreEnCurso.current) return;
+  const handleCerrarSesion = async () => {
+    if (cierreEnCurso.current) return;
 
-  cierreEnCurso.current = true;
+    cierreEnCurso.current = true;
 
-  try {
-    await signOut(auth);
-  } catch {
-    Alert.alert(
-      "Cerrar sesión",
-      "No se pudo cerrar la sesión. Inténtalo nuevamente.",
-    );
-    return;
-  } finally {
-    cierreEnCurso.current = false;
-  }
-};
+    try {
+      await signOut(auth);
+    } catch {
+      Alert.alert(
+        "Cerrar sesión",
+        "No se pudo cerrar la sesión. Inténtalo nuevamente.",
+      );
+      return;
+    } finally {
+      cierreEnCurso.current = false;
+    }
+  };
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flexGrow: 1 }}>

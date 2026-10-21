@@ -1,11 +1,11 @@
 import { auth } from "@/config/auth";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-    type ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
 } from "react";
 
 type SesionContextValue = {

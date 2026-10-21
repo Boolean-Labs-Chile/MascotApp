@@ -2,16 +2,12 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { auth } from "@/config/auth";
 import { FirebaseError } from "firebase/app";
-import {
-  createUserWithEmailAndPassword,
-  updateProfile,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useRef, useState } from "react";
 import { Alert, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Registrarse() {
-
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,7 +69,6 @@ export default function Registrarse() {
           ? "Tu cuenta se creó correctamente."
           : "Tu cuenta se creó, pero no se pudo guardar el nombre del perfil. No necesitas registrarte nuevamente.",
       );
-
     } catch (error) {
       let mensaje = "No se pudo crear la cuenta. Inténtalo nuevamente.";
 
