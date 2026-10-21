@@ -1,5 +1,7 @@
+import { auth } from "@/config/auth";
 import { Directory, File, Paths } from "expo-file-system";
 import type { SQLiteDatabase } from "expo-sqlite";
+import { obtenerIdUsuarioLocal } from "./usuarios";
 
 export class NombreMascotaDuplicadoError extends Error {
   constructor() {
@@ -46,9 +48,14 @@ export type DatosMascota = {
   };
 };
 
-export async function obtenerMascotas(db: SQLiteDatabase) {
+export async function obtenerMascotas(db: SQLiteDatabase): Promise<Mascota[]> {
+  if (!auth.currentUser) return [];
+
+  const idUsuario = await obtenerIdUsuarioLocal(db);
+
   return db.getAllAsync<Mascota>(
-    "SELECT * FROM mascota WHERE id_usuario = (SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1) ORDER BY id_mascota",
+    "SELECT * FROM mascota WHERE id_usuario = ? ORDER BY id_mascota",
+    idUsuario,
   );
 }
 
@@ -57,6 +64,7 @@ export async function guardarMascota(
   datos: DatosMascota,
   idMascota?: number,
 ) {
+  const idUsuario = await obtenerIdUsuarioLocal(db);
   const nombreNormalizado = normalizarNombreMascota(datos.nombre);
 
   const nombresGuardados = await db.getAllAsync<{
@@ -65,9 +73,8 @@ export async function guardarMascota(
   }>(
     `SELECT id_mascota, nombre
      FROM mascota
-     WHERE id_usuario = (
-       SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1
-     )`,
+     WHERE id_usuario = ?`,
+    idUsuario,
   );
 
   const nombreOcupado = nombresGuardados.some(
@@ -85,6 +92,7 @@ export async function guardarMascota(
   try {
     let imagenPerfil = datos.imagenPerfil;
     let imagenWeb = datos.imagenWeb;
+
     if (datos.fotoNueva) {
       if (datos.fotoNueva.plataforma === "web") {
         imagenWeb = datos.fotoNueva.uri;
@@ -92,10 +100,12 @@ export async function guardarMascota(
       } else {
         const carpeta = new Directory(Paths.document, "mascotas");
         carpeta.create({ idempotent: true, intermediates: true });
+
         copia = new File(
           carpeta,
           `${Date.now()}-${Math.random().toString(36).slice(2)}.${datos.fotoNueva.extension}`,
         );
+
         new File(datos.fotoNueva.uri).copy(copia);
         imagenPerfil = copia.uri;
         imagenWeb = null;
@@ -118,21 +128,34 @@ export async function guardarMascota(
 
     if (idMascota !== undefined) {
       const resultado = await db.runAsync(
-        "UPDATE mascota SET nombre=?, genero=?, estado_esterilizacion=?, tipo_animal=?, fecha_nacimiento=?, fecha_adopcion=?, color=?, rasgos=?, raza=?, imagen_perfil=?, imagen_web=? WHERE id_mascota=? AND id_usuario=(SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1)",
+        `UPDATE mascota
+         SET nombre=?, genero=?, estado_esterilizacion=?, tipo_animal=?,
+             fecha_nacimiento=?, fecha_adopcion=?, color=?, rasgos=?,
+             raza=?, imagen_perfil=?, imagen_web=?
+         WHERE id_mascota=? AND id_usuario=?`,
         ...valores,
         idMascota,
+        idUsuario,
       );
+
       if (resultado.changes !== 1) {
         throw new Error("No se encontró la mascota para actualizar.");
       }
+
       copia = null;
       return idMascota;
     }
 
     const resultado = await db.runAsync(
-      "INSERT INTO mascota (nombre, genero, estado_esterilizacion, tipo_animal, fecha_nacimiento, fecha_adopcion, color, rasgos, raza, imagen_perfil, imagen_web, id_usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1))",
+      `INSERT INTO mascota (
+        nombre, genero, estado_esterilizacion, tipo_animal,
+        fecha_nacimiento, fecha_adopcion, color, rasgos,
+        raza, imagen_perfil, imagen_web, id_usuario
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ...valores,
+      idUsuario,
     );
+
     copia = null;
     return resultado.lastInsertRowId;
   } catch (error) {
@@ -141,16 +164,21 @@ export async function guardarMascota(
     } catch {
       console.warn("No se pudo retirar la copia de la foto que no se guardó.");
     }
+
     throw error;
   }
 }
 
 /////*****REVISAR ESTO POR FAVOR********
 export async function eliminarMascota(db: SQLiteDatabase, idMascota: number) {
+  const idUsuario = await obtenerIdUsuarioLocal(db);
+
   const mascota = await db.getFirstAsync<{ imagen_perfil: string | null }>(
-    "SELECT imagen_perfil FROM mascota WHERE id_mascota=? AND id_usuario=(SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1)",
+    "SELECT imagen_perfil FROM mascota WHERE id_mascota=? AND id_usuario=?",
     idMascota,
+    idUsuario,
   );
+
   if (!mascota) {
     throw new Error("No se encontró la mascota para eliminar.");
   }
@@ -159,9 +187,11 @@ export async function eliminarMascota(db: SQLiteDatabase, idMascota: number) {
   // Los tratamientos de la mascota se eliminan automáticamente por la
   // restricción ON DELETE CASCADE de la tabla tratamiento.
   const resultado = await db.runAsync(
-    "DELETE FROM mascota WHERE id_mascota=? AND id_usuario=(SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1)",
+    "DELETE FROM mascota WHERE id_mascota=? AND id_usuario=?",
     idMascota,
+    idUsuario,
   );
+
   if (resultado.changes !== 1) {
     throw new Error("No se pudo eliminar la mascota.");
   }
@@ -172,6 +202,7 @@ export async function eliminarMascota(db: SQLiteDatabase, idMascota: number) {
   try {
     const carpeta = new Directory(Paths.document, "mascotas");
     const prefijo = `${carpeta.uri.replace(/\/$/, "")}/`;
+
     if (mascota.imagen_perfil?.startsWith(prefijo)) {
       const foto = new File(mascota.imagen_perfil);
       if (foto.exists) foto.delete();

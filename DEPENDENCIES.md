@@ -45,3 +45,26 @@
   - **Instalación:** Mediante `npx expo install react-native-gesture-handler`
   - **Uso:** Envolver el `Drawer` con `GestureHandlerRootView` en `app/(drawer)/_layout.tsx`, y alternar el menú con `DrawerActions.toggleDrawer()` desde `components/SidebarToggler.tsx`. Sin el `GestureHandlerRootView` en la raíz del Drawer el menú no responde.
 - **Responsable:** @gramzdev
+
+## firebase
+
+- **Versión**: ^13.0.0
+- **Finalidad**: SDK web (JavaScript) de Firebase. Provee Authentication (registro, inicio y cierre de sesión con correo y contraseña) y Firestore (base de datos en la nube).
+- **Motivo:** Implementar la autenticación real del Hito 4 (Issue #11) y respaldar las mascotas en Firestore. Se eligió el SDK web en lugar de `@react-native-firebase` porque este último no funciona en Expo Go, donde se presenta la app.
+- **Categoría:** dependencies
+- **Config:**
+  - **Instalación:** Mediante `npm install firebase`
+  - **Configuración:** `config/firebase.ts` construye `firebaseConfig` a partir de `google-services.json` (raíz del proyecto), el archivo que entrega Firebase al registrar la app Android. `app.json` lo declara en `android.googleServicesFile` para cuando se compile la app.
+  - **Uso:** Importar `auth` desde `@/config/auth` para las funciones de `firebase/auth` (`signInWithEmailAndPassword`, `createUserWithEmailAndPassword`, `signOut`, `onAuthStateChanged`), y `firestore` desde `@/config/firebase` para las de `firebase/firestore` (`doc`, `setDoc`). El estado de la sesión se lee con `useSesion()` de `@/contexts/sesion-context`.
+- **Responsable:** @Darkhee
+
+## @react-native-async-storage/async-storage
+
+- **Versión**: 2.2.0
+- **Finalidad**: Almacenamiento local de pares clave-valor en el dispositivo.
+- **Motivo:** Firebase Auth la necesita para guardar la sesión en React Native. Sin ella, el usuario tendría que iniciar sesión cada vez que abre la app.
+- **Categoría:** dependencies
+- **Config:**
+  - **Instalación:** Mediante `npx expo install @react-native-async-storage/async-storage`
+  - **Uso:** No se usa directamente en las pantallas. `config/auth.ts` la entrega a Firebase con `initializeAuth(firebaseApp, { persistence: getReactNativePersistence(AsyncStorage) })`.
+- **Responsable:** @Darkhee

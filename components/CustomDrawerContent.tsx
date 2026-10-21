@@ -1,16 +1,39 @@
 import { useMascotas } from "@/components/SidebarToggler";
+import { auth } from "@/config/auth";
 import { AntDesign, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import {
   DrawerContentScrollView,
   type DrawerContentComponentProps,
 } from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { signOut } from "firebase/auth";
+import { useRef } from "react";
+import { Alert, Pressable, Text, View } from "react-native";
 
 export function CustomDrawerContent(props: DrawerContentComponentProps) {
   const router = useRouter();
   const { mascotas, activa, seleccionar, cargando, error, recargar } =
     useMascotas();
+
+  const cierreEnCurso = useRef(false);
+
+  const handleCerrarSesion = async () => {
+    if (cierreEnCurso.current) return;
+
+    cierreEnCurso.current = true;
+
+    try {
+      await signOut(auth);
+    } catch {
+      Alert.alert(
+        "Cerrar sesión",
+        "No se pudo cerrar la sesión. Inténtalo nuevamente.",
+      );
+      return;
+    } finally {
+      cierreEnCurso.current = false;
+    }
+  };
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flexGrow: 1 }}>
@@ -103,9 +126,7 @@ export function CustomDrawerContent(props: DrawerContentComponentProps) {
         </View>
 
         <Pressable
-          onPress={() => {
-            router.replace("/login");
-          }}
+          onPress={handleCerrarSesion}
           className="flex-row items-center justify-center gap-3 rounded-md border-t border-gray-300 p-3 active:opacity-70"
         >
           <Ionicons name="log-out-outline" size={24} color="#f44336" />
