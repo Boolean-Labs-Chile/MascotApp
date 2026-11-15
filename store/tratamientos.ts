@@ -1,4 +1,7 @@
+import { auth } from "@/config/auth";
+import { firestore } from "@/config/firebase";
 import type { SQLiteDatabase } from "expo-sqlite";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { obtenerIdUsuarioLocal } from "./usuarios";
 
 export type Tratamiento = {
@@ -16,6 +19,11 @@ export type DatosTratamiento = {
   fechaVencimiento: string;
   fechaSiguienteDosis: string;
   comentarios: string;
+};
+
+type ResultadoGuardarTratamiento = {
+  guardado: boolean;
+  respaldadoFirestore: boolean;
 };
 
 export async function obtenerTratamientos(
@@ -46,7 +54,7 @@ export async function guardarTratamiento(
   db: SQLiteDatabase,
   idMascota: number,
   datos: DatosTratamiento,
-) {
+): Promise<ResultadoGuardarTratamiento> {
   const idUsuario = await obtenerIdUsuarioLocal(db);
 
   const resultado = await db.runAsync(
@@ -71,7 +79,41 @@ export async function guardarTratamiento(
     idUsuario,
   );
 
-  return resultado.changes === 1;
+  if (resultado.changes !== 1) {
+    return { guardado: false, respaldadoFirestore: false };
+  }
+
+  const usuarioFirebase = auth.currentUser;
+
+  if (!usuarioFirebase) {
+    return { guardado: true, respaldadoFirestore: false };
+  }
+
+  try {
+    await setDoc(
+      doc(
+        firestore,
+        "usuarios",
+        usuarioFirebase.uid,
+        "tratamientos",
+        String(resultado.lastInsertRowId),
+      ),
+      {
+        idTratamientoLocal: resultado.lastInsertRowId,
+        idMascotaLocal: idMascota,
+        nombreProducto: datos.nombreProducto,
+        fechaAplicacion: datos.fechaAplicacion,
+        fechaVencimiento: datos.fechaVencimiento,
+        fechaSiguienteDosis: datos.fechaSiguienteDosis,
+        comentarios: datos.comentarios,
+        creadoEn: serverTimestamp(),
+      },
+    );
+
+    return { guardado: true, respaldadoFirestore: true };
+  } catch {
+    return { guardado: true, respaldadoFirestore: false };
+  }
 }
 
 //*****REVISAR POR FAVOR******
