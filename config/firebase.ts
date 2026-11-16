@@ -1,5 +1,6 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import googleServices from "../google-services.json";
 
 // La configuración se lee desde google-services.json (el archivo que entrega
@@ -20,3 +21,4 @@ export const firebaseApp =
   getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 export const firestore = getFirestore(firebaseApp);
+export const storage = getStorage(firebaseApp);
