@@ -25,8 +25,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Pregunta de confirmación que funciona en móvil (Alert) y en web (confirm).
-// Devuelve true si la persona elige la opción de confirmar.
 function confirmar(
   titulo: string,
   mensaje: string,
@@ -67,21 +65,15 @@ export default function MascotaNueva() {
   const existente = mascotas.find(
     (mascota) => String(mascota.id_mascota) === id,
   );
+
   const cargado = useRef<string | null>(null);
   const guardando = useRef(false);
-  // true cuando la salida de la pantalla es intencional (guardar, eliminar o
-  // descartar cambios): evita que la alerta de "cambios sin guardar" reaparezca
   const saliendo = useRef(false);
   const alertaAbierta = useRef(false);
+
   const [ocupado, setOcupado] = useState(false);
   const [fotoNueva, setFotoNueva] = useState(false);
   const [extension, setExtension] = useState("jpg");
-
-  const avisar = (mensaje: string) => {
-    if (Platform.OS === "web") window.alert(mensaje);
-    else Alert.alert("Mascota", mensaje);
-  };
-
   const [nombre, setNombre] = useState("");
   const [genero, setGenero] = useState<"macho" | "hembra" | null>(null);
   const [esterilizado, setEsterilizado] = useState(false);
@@ -92,24 +84,32 @@ export default function MascotaNueva() {
   const [signosDistintivos, setSignosDistintivos] = useState("");
   const [raza, setRaza] = useState("");
   const [fotoUri, setFotoUri] = useState<string | null>(null);
-
   const [showPickerNacimiento, setShowPickerNacimiento] = useState(false);
   const [showPickerAdopcion, setShowPickerAdopcion] = useState(false);
 
+  const avisar = (mensaje: string) => {
+    if (Platform.OS === "web") {
+      window.alert(mensaje);
+    } else {
+      Alert.alert("Mascota", mensaje);
+    }
+  };
+
   useEffect(() => {
     if (!existente || !id || cargado.current === id) return;
+
     cargado.current = id;
     setNombre(existente.nombre);
     setGenero(existente.genero);
     setEsterilizado(Boolean(existente.estado_esterilizacion));
     setFechaNacimiento(
       existente.fecha_nacimiento
-        ? new Date(existente.fecha_nacimiento + "T12:00:00")
+        ? new Date(`${existente.fecha_nacimiento}T12:00:00`)
         : new Date(),
     );
     setFechaAdopcion(
       existente.fecha_adopcion
-        ? new Date(existente.fecha_adopcion + "T12:00:00")
+        ? new Date(`${existente.fecha_adopcion}T12:00:00`)
         : new Date(),
     );
     setEspecie(existente.tipo_animal ?? "");
@@ -122,9 +122,11 @@ export default function MascotaNueva() {
   const fechaSQL = (fecha: Date) =>
     `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}-${String(fecha.getDate()).padStart(2, "0")}`;
 
-  // Solo hay "cambios sin guardar" al editar una mascota existente: compara lo
-  // que hay en el formulario contra lo que está guardado.
-  const hoy = fechaSQL(new Date());
+  const hoyFecha = new Date();
+  const fechaMinimaNacimiento = new Date(hoyFecha);
+  fechaMinimaNacimiento.setFullYear(hoyFecha.getFullYear() - 35);
+  const hoy = fechaSQL(hoyFecha);
+
   const hayCambios =
     existente !== undefined &&
     (nombre !== existente.nombre ||
@@ -138,23 +140,19 @@ export default function MascotaNueva() {
       raza !== (existente.raza ?? "") ||
       fotoNueva);
 
-  // Intercepta TODAS las formas de volver atrás (botón físico de Android,
-  // gesto de iOS y flecha del header, si existiera).
   useEffect(() => {
     return navigation.addListener("beforeRemove", (evento) => {
-      // Salida intencional: dejar pasar
       if (saliendo.current) return;
 
-      // Guardando o eliminando: no se puede salir hasta terminar
       if (guardando.current) {
         evento.preventDefault();
         return;
       }
 
-      // Sin cambios pendientes: dejar pasar
       if (!hayCambios) return;
 
       evento.preventDefault();
+
       if (alertaAbierta.current) return;
       alertaAbierta.current = true;
 
@@ -179,25 +177,31 @@ export default function MascotaNueva() {
   const handleImageSelected = (asset: ImagePickerAsset) => {
     const nombreArchivo = (asset.fileName ?? asset.uri).split(/[?#]/)[0];
     const sufijo = nombreArchivo.split(".").pop()?.toLowerCase();
+
     const formatos: Record<string, string> = {
       jpg: "image/jpeg",
       jpeg: "image/jpeg",
       png: "image/png",
       webp: "image/webp",
     };
+
     const tipo = asset.mimeType ?? formatos[sufijo ?? ""] ?? "";
+
     if (!["image/jpeg", "image/png", "image/webp"].includes(tipo)) {
       avisar("Selecciona una imagen JPG, PNG o WebP.");
       return;
     }
+
     if ((asset.fileSize ?? 0) > 5 * 1024 * 1024) {
       avisar("La foto debe pesar menos de 5 MB.");
       return;
     }
+
     if (Platform.OS === "web" && !asset.base64) {
       avisar("No se pudo leer la foto. Selecciónala nuevamente.");
       return;
     }
+
     setFotoUri(
       Platform.OS === "web" ? `data:${tipo};base64,${asset.base64}` : asset.uri,
     );
@@ -207,22 +211,37 @@ export default function MascotaNueva() {
 
   const handleGuardar = async () => {
     if (guardando.current || cargando) return;
-    if (id && !existente) return avisar("Esta mascota ya no está disponible.");
-    if (!nombre.trim() || !genero || !especie.trim()) {
-      return avisar("Completa el nombre, el género y la especie.");
+
+    if (id && !existente) {
+      avisar("Esta mascota ya no está disponible.");
+      return;
     }
+
+    if (!nombre.trim() || !genero || !especie.trim()) {
+      avisar("Completa el nombre, el género y la especie.");
+      return;
+    }
+
+    const nacimiento = fechaSQL(fechaNacimiento);
+    const adopcion = fechaSQL(fechaAdopcion);
+
     if (
       Number.isNaN(fechaNacimiento.getTime()) ||
       Number.isNaN(fechaAdopcion.getTime()) ||
-      fechaSQL(fechaNacimiento) > fechaSQL(new Date()) ||
-      fechaSQL(fechaAdopcion) < fechaSQL(fechaNacimiento)
+      nacimiento < fechaSQL(fechaMinimaNacimiento) ||
+      nacimiento > hoy ||
+      adopcion < nacimiento ||
+      adopcion > hoy
     ) {
-      return avisar(
-        "Revisa las fechas: el nacimiento no puede ser futuro y la adopción no puede ser anterior al nacimiento.",
+      avisar(
+        "Revisa las fechas: la mascota debe tener como máximo 35 años y la adopción debe estar entre su nacimiento y hoy.",
       );
+      return;
     }
+
     guardando.current = true;
     setOcupado(true);
+
     try {
       const mascotaId = await guardarMascota(
         db,
@@ -231,8 +250,8 @@ export default function MascotaNueva() {
           genero,
           esterilizado,
           tipoAnimal: especie.trim(),
-          fechaNacimiento: fechaSQL(fechaNacimiento),
-          fechaAdopcion: fechaSQL(fechaAdopcion),
+          fechaNacimiento: nacimiento,
+          fechaAdopcion: adopcion,
           color: color.trim(),
           rasgos: signosDistintivos.trim(),
           raza: raza.trim(),
@@ -249,11 +268,18 @@ export default function MascotaNueva() {
         },
         existente?.id_mascota,
       );
-      // Copia en Firestore. No bloquea: si falla, la mascota ya está en SQLite.
-      void respaldarMascota(db, mascotaId).catch((error) =>
-        console.warn("No se pudo respaldar en Firestore:", error),
-      );
-      // Se guardó: la salida a /home es intencional
+
+      void respaldarMascota(db, mascotaId).catch((error) => {
+        console.warn("No se pudo respaldar en Firebase:", error);
+
+        const detalle =
+          error instanceof Error ? error.message : "Error desconocido.";
+
+        avisar(
+          `La mascota se guardó en este teléfono, pero Firebase no pudo respaldarla.\n\n${detalle}`,
+        );
+      });
+
       saliendo.current = true;
       await recargar().catch(() => undefined);
       seleccionar(mascotaId);
@@ -267,7 +293,6 @@ export default function MascotaNueva() {
         return;
       }
 
-      // Muestra el error real mientras se desarrolla (no aparece en producción)
       console.error("Error al guardar la mascota:", error);
 
       avisar(
@@ -288,9 +313,11 @@ export default function MascotaNueva() {
       "Cancelar",
       "Eliminar",
     );
+
     if (!confirmado || guardando.current) return;
 
     guardando.current = true;
+
     try {
       await eliminarMascota(db, existente.id_mascota);
     } catch {
@@ -299,21 +326,18 @@ export default function MascotaNueva() {
       return;
     }
 
-    // Ya se eliminó: la salida a /home es intencional. Si no quedan mascotas,
-    // /home muestra la pantalla "Crea un perfil para tu mascota".
     saliendo.current = true;
     seleccionar(null);
     await recargar().catch(() => undefined);
     router.replace("/home");
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("es-ES", {
+  const formatDate = (fecha: Date) =>
+    fecha.toLocaleDateString("es-ES", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
-  };
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -322,19 +346,18 @@ export default function MascotaNueva() {
           <Text className="mb-2 text-3xl font-bold text-text">
             {id ? "Edita a tu mascota" : "Registra a tu mascota"}
           </Text>
+
           <Text className="mb-6 text-base font-normal text-text opacity-70">
             {id
               ? "Actualiza la información de tu mascota"
               : "Completa la información de tu nueva mascota"}
           </Text>
 
-          {/* Foto de home */}
           <ImageSelector
             imageUri={fotoUri}
             onImageSelected={handleImageSelected}
           />
 
-          {/* Nombre */}
           <Input
             label="Nombre"
             placeholder="Nombre de tu mascota"
@@ -342,16 +365,17 @@ export default function MascotaNueva() {
             onChangeText={setNombre}
           />
 
-          {/* Género */}
           <View className="mb-4">
             <Text className="mb-2 text-base font-semibold text-text">
               Género
             </Text>
+
             <RadioButton
               label="Macho"
               selected={genero === "macho"}
               onPress={() => setGenero("macho")}
             />
+
             <RadioButton
               label="Hembra"
               selected={genero === "hembra"}
@@ -359,11 +383,11 @@ export default function MascotaNueva() {
             />
           </View>
 
-          {/* Esterilizado */}
           <View className="mb-4 flex-row items-center justify-between">
             <Text className="text-base font-semibold text-text">
               Esterilizado
             </Text>
+
             <Switch
               value={esterilizado}
               onValueChange={setEsterilizado}
@@ -372,11 +396,11 @@ export default function MascotaNueva() {
             />
           </View>
 
-          {/* Fecha de nacimiento */}
           <View className="mb-4">
             <Text className="mb-1 text-base font-semibold text-text">
               Fecha de nacimiento
             </Text>
+
             <TouchableOpacity
               className="rounded-xl border border-gray-200 bg-white px-4 py-3"
               onPress={() => setShowPickerNacimiento(true)}
@@ -385,27 +409,33 @@ export default function MascotaNueva() {
                 {formatDate(fechaNacimiento)}
               </Text>
             </TouchableOpacity>
+
             {showPickerNacimiento &&
               (Platform.OS === "web" ? (
                 <input
                   aria-label="Fecha de nacimiento"
                   type="date"
                   value={fechaSQL(fechaNacimiento)}
-                  max={fechaSQL(new Date())}
+                  min={fechaSQL(fechaMinimaNacimiento)}
+                  max={hoy}
                   onChange={(event) => {
-                    if (event.target.value)
+                    if (event.target.value) {
                       setFechaNacimiento(
-                        new Date(event.target.value + "T12:00:00"),
+                        new Date(`${event.target.value}T12:00:00`),
                       );
+                    }
                   }}
                 />
               ) : (
                 <DateTimePicker
                   value={fechaNacimiento}
                   mode="date"
+                  minimumDate={fechaMinimaNacimiento}
+                  maximumDate={hoyFecha}
                   display={Platform.OS === "ios" ? "spinner" : "default"}
                   onChange={(event, selectedDate) => {
                     setShowPickerNacimiento(false);
+
                     if (selectedDate) {
                       setFechaNacimiento(selectedDate);
                     }
@@ -414,11 +444,11 @@ export default function MascotaNueva() {
               ))}
           </View>
 
-          {/* Fecha de adopción */}
           <View className="mb-4">
             <Text className="mb-1 text-base font-semibold text-text">
               Fecha de adopción
             </Text>
+
             <TouchableOpacity
               className="rounded-xl border border-gray-200 bg-white px-4 py-3"
               onPress={() => setShowPickerAdopcion(true)}
@@ -427,6 +457,7 @@ export default function MascotaNueva() {
                 {formatDate(fechaAdopcion)}
               </Text>
             </TouchableOpacity>
+
             {showPickerAdopcion &&
               (Platform.OS === "web" ? (
                 <input
@@ -434,20 +465,25 @@ export default function MascotaNueva() {
                   type="date"
                   value={fechaSQL(fechaAdopcion)}
                   min={fechaSQL(fechaNacimiento)}
+                  max={hoy}
                   onChange={(event) => {
-                    if (event.target.value)
+                    if (event.target.value) {
                       setFechaAdopcion(
-                        new Date(event.target.value + "T12:00:00"),
+                        new Date(`${event.target.value}T12:00:00`),
                       );
+                    }
                   }}
                 />
               ) : (
                 <DateTimePicker
                   value={fechaAdopcion}
                   mode="date"
+                  minimumDate={fechaNacimiento}
+                  maximumDate={hoyFecha}
                   display={Platform.OS === "ios" ? "spinner" : "default"}
                   onChange={(event, selectedDate) => {
                     setShowPickerAdopcion(false);
+
                     if (selectedDate) {
                       setFechaAdopcion(selectedDate);
                     }
@@ -456,7 +492,6 @@ export default function MascotaNueva() {
               ))}
           </View>
 
-          {/* Especie */}
           <Input
             label="Especie"
             placeholder="Ej: Perro, Gato, etc."
@@ -464,7 +499,6 @@ export default function MascotaNueva() {
             onChangeText={setEspecie}
           />
 
-          {/* Color */}
           <Input
             label="Color"
             placeholder="Color de tu mascota"
@@ -472,7 +506,6 @@ export default function MascotaNueva() {
             onChangeText={setColor}
           />
 
-          {/* Signos distintivos */}
           <Input
             label="Signos distintivos"
             placeholder="Marcas o características especiales"
@@ -481,7 +514,6 @@ export default function MascotaNueva() {
             multiline
           />
 
-          {/* Raza */}
           <Input
             label="Raza"
             placeholder="Raza de tu mascota"
@@ -489,7 +521,6 @@ export default function MascotaNueva() {
             onChangeText={setRaza}
           />
 
-          {/* Botones */}
           <View className="mt-6">
             <Button
               label={
@@ -501,6 +532,7 @@ export default function MascotaNueva() {
               }
               onPress={handleGuardar}
             />
+
             {id ? (
               <Button
                 label="Eliminar mascota"
