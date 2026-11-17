@@ -26,6 +26,116 @@ type ResultadoGuardarTratamiento = {
   respaldadoFirestore: boolean;
 };
 
+export const MAX_ANIOS_SIGUIENTE_DOSIS = 3;
+export const MAX_ANIOS_VENCIMIENTO = 5;
+
+// Segundos máximos que se espera la confirmación de Firestore antes de dar
+// el respaldo por no realizado (por ejemplo, sin internet).
+const ESPERA_RESPALDO_MS = 5000;
+
+function fechaLimite(aniosDesdeHoy: number) {
+  const limite = new Date();
+  limite.setFullYear(limite.getFullYear() + aniosDesdeHoy);
+  return limite;
+}
+
+function aTexto(fecha: Date) {
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  return `${fecha.getFullYear()}-${mes}-${dia}`;
+}
+
+export function fechaMaximaSiguienteDosis() {
+  return fechaLimite(MAX_ANIOS_SIGUIENTE_DOSIS);
+}
+
+export function fechaMaximaVencimiento() {
+  return fechaLimite(MAX_ANIOS_VENCIMIENTO);
+}
+
+export function validarFechasTratamiento(datos: DatosTratamiento) {
+  if (
+    datos.fechaSiguienteDosis &&
+    datos.fechaSiguienteDosis > aTexto(fechaMaximaSiguienteDosis())
+  ) {
+    return `La siguiente dosis no puede ser a más de ${MAX_ANIOS_SIGUIENTE_DOSIS} años desde hoy.`;
+  }
+
+  if (
+    datos.fechaVencimiento &&
+    datos.fechaVencimiento > aTexto(fechaMaximaVencimiento())
+  ) {
+    return `La fecha de vencimiento no puede ser a más de ${MAX_ANIOS_VENCIMIENTO} años desde hoy.`;
+  }
+
+  return null;
+}
+
+function conLimiteDeTiempo<T>(promesa: Promise<T>, ms: number) {
+  return new Promise<T>((resolve, reject) => {
+    const temporizador = setTimeout(
+      () => reject(new Error("Tiempo de espera agotado")),
+      ms,
+    );
+
+    promesa.then(
+      (valor) => {
+        clearTimeout(temporizador);
+        resolve(valor);
+      },
+      (error) => {
+        clearTimeout(temporizador);
+        reject(error);
+      },
+    );
+  });
+}
+
+// Copia el tratamiento a Firestore en usuarios/{uid}/tratamientos/{id}.
+// SQLite sigue siendo la base principal: si esto falla o tarda demasiado,
+// el tratamiento igual queda guardado en el teléfono.
+async function respaldarTratamiento(
+  idMascota: number,
+  idTratamiento: number,
+  datos: DatosTratamiento,
+  esNuevo: boolean,
+) {
+  const usuarioFirebase = auth.currentUser;
+
+  if (!usuarioFirebase) return false;
+
+  try {
+    await conLimiteDeTiempo(
+      setDoc(
+        doc(
+          firestore,
+          "usuarios",
+          usuarioFirebase.uid,
+          "tratamientos",
+          String(idTratamiento),
+        ),
+        {
+          idTratamientoLocal: idTratamiento,
+          idMascotaLocal: idMascota,
+          nombreProducto: datos.nombreProducto,
+          fechaAplicacion: datos.fechaAplicacion,
+          fechaVencimiento: datos.fechaVencimiento,
+          fechaSiguienteDosis: datos.fechaSiguienteDosis,
+          comentarios: datos.comentarios,
+          ...(esNuevo ? { creadoEn: serverTimestamp() } : {}),
+          actualizadoEn: serverTimestamp(),
+        },
+        { merge: true },
+      ),
+      ESPERA_RESPALDO_MS,
+    );
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function obtenerTratamientos(
   db: SQLiteDatabase,
   idMascota: number,
@@ -55,6 +165,10 @@ export async function guardarTratamiento(
   idMascota: number,
   datos: DatosTratamiento,
 ): Promise<ResultadoGuardarTratamiento> {
+  if (validarFechasTratamiento(datos)) {
+    return { guardado: false, respaldadoFirestore: false };
+  }
+
   const idUsuario = await obtenerIdUsuarioLocal(db);
 
   const resultado = await db.runAsync(
@@ -83,46 +197,26 @@ export async function guardarTratamiento(
     return { guardado: false, respaldadoFirestore: false };
   }
 
-  const usuarioFirebase = auth.currentUser;
+  const respaldadoFirestore = await respaldarTratamiento(
+    idMascota,
+    resultado.lastInsertRowId,
+    datos,
+    true,
+  );
 
-  if (!usuarioFirebase) {
-    return { guardado: true, respaldadoFirestore: false };
-  }
-
-  try {
-    await setDoc(
-      doc(
-        firestore,
-        "usuarios",
-        usuarioFirebase.uid,
-        "tratamientos",
-        String(resultado.lastInsertRowId),
-      ),
-      {
-        idTratamientoLocal: resultado.lastInsertRowId,
-        idMascotaLocal: idMascota,
-        nombreProducto: datos.nombreProducto,
-        fechaAplicacion: datos.fechaAplicacion,
-        fechaVencimiento: datos.fechaVencimiento,
-        fechaSiguienteDosis: datos.fechaSiguienteDosis,
-        comentarios: datos.comentarios,
-        creadoEn: serverTimestamp(),
-      },
-    );
-
-    return { guardado: true, respaldadoFirestore: true };
-  } catch {
-    return { guardado: true, respaldadoFirestore: false };
-  }
+  return { guardado: true, respaldadoFirestore };
 }
 
-//*****REVISAR POR FAVOR******
 export async function actualizarTratamiento(
   db: SQLiteDatabase,
   idMascota: number,
   idTratamiento: number,
   datos: DatosTratamiento,
-) {
+): Promise<ResultadoGuardarTratamiento> {
+  if (validarFechasTratamiento(datos)) {
+    return { guardado: false, respaldadoFirestore: false };
+  }
+
   const idUsuario = await obtenerIdUsuarioLocal(db);
 
   const resultado = await db.runAsync(
@@ -148,5 +242,16 @@ export async function actualizarTratamiento(
     idUsuario,
   );
 
-  return resultado.changes === 1;
+  if (resultado.changes !== 1) {
+    return { guardado: false, respaldadoFirestore: false };
+  }
+
+  const respaldadoFirestore = await respaldarTratamiento(
+    idMascota,
+    idTratamiento,
+    datos,
+    false,
+  );
+
+  return { guardado: true, respaldadoFirestore };
 }

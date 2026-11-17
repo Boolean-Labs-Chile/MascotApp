@@ -4,8 +4,11 @@ import Input from "@/components/Input";
 import { useMascotas } from "@/components/SidebarToggler";
 import {
   actualizarTratamiento,
+  fechaMaximaSiguienteDosis,
+  fechaMaximaVencimiento,
   guardarTratamiento,
   obtenerTratamientos,
+  validarFechasTratamiento,
   type Tratamiento,
 } from "@/store/tratamientos";
 import { Ionicons } from "@expo/vector-icons";
@@ -238,6 +241,18 @@ export default function TratamientoNuevo() {
       );
       return;
     }
+    const errorLimites = validarFechasTratamiento({
+      nombreProducto,
+      fechaAplicacion: aplicacion,
+      fechaVencimiento: vencimiento,
+      fechaSiguienteDosis: siguienteDosis,
+      comentarios,
+    });
+
+    if (errorLimites) {
+      avisar(errorLimites);
+      return;
+    }
 
     guardando.current = true;
 
@@ -251,15 +266,7 @@ export default function TratamientoNuevo() {
       };
 
       const resultado = editando
-        ? {
-            guardado: await actualizarTratamiento(
-              db,
-              activa.id_mascota,
-              Number(id),
-              datos,
-            ),
-            respaldadoFirestore: true,
-          }
+        ? await actualizarTratamiento(db, activa.id_mascota, Number(id), datos)
         : await guardarTratamiento(db, activa.id_mascota, datos);
 
       if (!resultado.guardado) {
@@ -372,6 +379,7 @@ export default function TratamientoNuevo() {
                   value={fechaVencimiento}
                   mode="date"
                   minimumDate={fechaAplicacion}
+                  maximumDate={fechaMaximaVencimiento()}
                   display={Platform.OS === "ios" ? "spinner" : "default"}
                   onChange={(event, selectedDate) => {
                     setShowPickerVencimiento(false);
@@ -403,6 +411,7 @@ export default function TratamientoNuevo() {
                   value={fechaSiguienteDosis}
                   mode="date"
                   minimumDate={fechaAplicacion}
+                  maximumDate={fechaMaximaSiguienteDosis()}
                   display={Platform.OS === "ios" ? "spinner" : "default"}
                   onChange={(event, selectedDate) => {
                     setShowPickerDosis(false);
